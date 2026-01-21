@@ -23,6 +23,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.subsystems.swervedrive.Vision;
+import frc.robot.subsystems.swervedrive.Vision.Cameras;
+
 import java.io.File;
 import swervelib.SwerveInputStream;
 
@@ -36,9 +39,15 @@ public class RobotContainer
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final         CommandXboxController driverXbox = new CommandXboxController(0);
+
+  final         CommandXboxController logitechController = new CommandXboxController(2);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/neo"));
+                                                                                "swerve/SeaViper"));
+
+  private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
+
+  private final Cameras cameraEnum = Cameras.CENTER_CAM;
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser;
@@ -49,7 +58,8 @@ public class RobotContainer
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY() * -1,
                                                                 () -> driverXbox.getLeftX() * -1)
-                                                            .withControllerRotationAxis(driverXbox::getRightX)
+                                                            //.withControllerRotationAxis(driverXbox::getRightX)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(true);
@@ -193,8 +203,25 @@ public class RobotContainer
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
+
+      logitechController.a()
+        .whileTrue(drivebase.aimAtTarget(cameraEnum));
+      
     }
 
+  }
+
+
+  public SwerveSubsystem getDrivebase() {
+    return drivebase;
+  }
+
+  public Vision getVision() {
+    return vision;
+  }
+
+  public Cameras getCameraEnum() {
+    return cameraEnum;
   }
 
   /**

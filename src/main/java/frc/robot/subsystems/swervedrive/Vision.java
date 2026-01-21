@@ -332,34 +332,38 @@ public class Vision
   /**
    * Camera Enum to select each camera
    */
-  enum Cameras
+  public static enum Cameras
   {
     /**
      * Left Camera
      */
+    /*
     LEFT_CAM("left",
              new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(30)),
              new Translation3d(Units.inchesToMeters(12.056),
                                Units.inchesToMeters(10.981),
                                Units.inchesToMeters(8.44)),
              VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+    */
     /**
      * Right Camera
      */
+    /*
     RIGHT_CAM("right",
               new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(-30)),
               new Translation3d(Units.inchesToMeters(12.056),
                                 Units.inchesToMeters(-10.981),
                                 Units.inchesToMeters(8.44)),
               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
+    */
     /**
      * Center Camera
      */
-    CENTER_CAM("center",
-               new Rotation3d(0, Units.degreesToRadians(18), 0),
-               new Translation3d(Units.inchesToMeters(-4.628),
-                                 Units.inchesToMeters(-10.687),
-                                 Units.inchesToMeters(16.129)),
+    CENTER_CAM("centerCam",
+               new Rotation3d(0, 0, 0),
+               new Translation3d(Units.inchesToMeters(13.25),
+                                 0,
+                                 Units.inchesToMeters(11.00)),
                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
 
     /**
@@ -369,7 +373,7 @@ public class Vision
     /**
      * Camera instance for comms.
      */
-    public final  PhotonCamera                 camera;
+    public final  PhotonCamera                 photonCamera;
     /**
      * Pose estimator for camera.
      */
@@ -423,7 +427,7 @@ public class Vision
     {
       latencyAlert = new Alert("'" + name + "' Camera is experiencing high latency.", AlertType.kWarning);
 
-      camera = new PhotonCamera(name);
+      photonCamera = new PhotonCamera(name);
 
       // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
       robotToCamTransform = new Transform3d(robotToCamTranslation, robotToCamRotation);
@@ -449,7 +453,7 @@ public class Vision
         cameraProp.setAvgLatencyMs(35);
         cameraProp.setLatencyStdDevMs(5);
 
-        cameraSim = new PhotonCameraSim(camera, cameraProp);
+        cameraSim = new PhotonCameraSim(photonCamera, cameraProp);
         cameraSim.enableDrawWireframe(true);
       }
     }
@@ -529,7 +533,7 @@ public class Vision
         mostRecentTimestamp = Math.max(mostRecentTimestamp, result.getTimestampSeconds());
       }
 
-        resultsList = Robot.isReal() ? camera.getAllUnreadResults() : cameraSim.getCamera().getAllUnreadResults();
+        resultsList = Robot.isReal() ? photonCamera.getAllUnreadResults() : cameraSim.getCamera().getAllUnreadResults();
         resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
           return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
         });

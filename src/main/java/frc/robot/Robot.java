@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.subsystems.swervedrive.Vision;
+import frc.robot.subsystems.swervedrive.Vision.Cameras;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to each mode, as
@@ -22,6 +25,12 @@ public class Robot extends TimedRobot
   private        Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+
+  private SwerveSubsystem drivebase;
+
+  private Vision vision;
+
+  private Cameras cameraEnum;
 
   private Timer disabledTimer;
 
@@ -45,6 +54,12 @@ public class Robot extends TimedRobot
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
+    drivebase = m_robotContainer.getDrivebase();
+
+    vision = m_robotContainer.getVision();
+
+    cameraEnum = m_robotContainer.getCameraEnum();
+
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
     // immediately when disabled, but then also let it be pushed more 
     disabledTimer = new Timer();
@@ -53,7 +68,12 @@ public class Robot extends TimedRobot
     {
       DriverStation.silenceJoystickConnectionWarning(true);
     }
+
+    drivebase.zeroGyro();
+
   }
+
+  
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics that you want ran
@@ -143,6 +163,7 @@ public class Robot extends TimedRobot
   @Override
   public void teleopPeriodic()
   {
+    vision.getEstimatedGlobalPose(cameraEnum);
   }
 
   @Override

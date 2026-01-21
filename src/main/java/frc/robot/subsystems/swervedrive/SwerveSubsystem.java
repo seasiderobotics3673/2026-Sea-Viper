@@ -228,9 +228,8 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public Command aimAtTarget(Cameras camera)
   {
-
     return run(() -> {
-      Optional<PhotonPipelineResult> resultO = camera.getBestResult();
+      Optional<PhotonPipelineResult> resultO = camera.getLatestResult();
       if (resultO.isPresent())
       {
         var result = resultO.get();
