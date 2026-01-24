@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -20,7 +21,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import java.awt.Desktop;
 import java.util.ArrayList;
@@ -327,6 +330,94 @@ public class Vision
     }
 
     field2d.getObject("tracked targets").setPoses(poses);
+  }
+
+
+/*
+ * 
+ * Gets the X and Y position of the Apriltag with the least ambiguity. Default unit is meters.
+ * SpecificID boolean should be set to true if you want a specific ID of Apriltag
+ * 
+ */
+  public Translation2d getTargetPos(Cameras camera, boolean isSpecificID, int fiducialId) {
+    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
+
+    if (result0.isEmpty()) {
+      DriverStation.reportWarning("Get Target Position Failed; Is Your Camera On?", false);
+      return new Translation2d();
+    }
+
+    var result = result0.get();
+
+    if (!result.hasTargets()) {
+      DriverStation.reportWarning("Get Target Position called with no targets in sight.", false);
+      return new Translation2d();
+    }
+
+    double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
+    double cameraPitch = camera.robotToCamTransform.getRotation().getY(); //Should Return 0
+    double targetHeight = Constants.APRILTAG_HEIGHTS[result.getBestTarget().getFiducialId() - 1];
+    if (isSpecificID) {
+      targetHeight = Constants.APRILTAG_HEIGHTS[fiducialId - 1];
+    }
+    double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
+    (
+      Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+      targetHeight, 
+      cameraPitch,
+      estimatedTargetPitch
+    );
+    
+    Rotation2d estimatedYaw = Rotation2d.fromDegrees(-result.getBestTarget().getYaw());
+
+    return PhotonUtils.estimateCameraToTargetTranslation(estimatedTargetDistance, estimatedYaw);
+  }
+
+
+    //Inaccurate at lower target pitches.
+  public double getDistanceToTarget(Cameras camera) {
+    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
+    if (result0.isPresent()) {
+      var result = result0.get();
+
+      if (result.hasTargets()) {
+        double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
+        double targetHeight = Constants.APRILTAG_HEIGHTS[result.getBestTarget().getFiducialId() - 1]; //Dummy Value; Change Later
+        double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
+        (
+          Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+          targetHeight, 
+          0.0,
+          estimatedTargetPitch
+        );
+
+        return estimatedTargetDistance;
+      }
+    }
+    return -1.0;
+  }
+
+      //Inaccurate at lower target pitches.
+  public double getDistanceToTargetID(Cameras camera, int fiducialId) {
+    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
+    if (result0.isPresent()) {
+      var result = result0.get();
+
+      if (result.hasTargets()) {
+        double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
+        double targetHeight = Constants.APRILTAG_HEIGHTS[fiducialId - 1]; //Dummy Value; Change Later
+        double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
+        (
+          Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+          targetHeight, 
+          0.0,
+          estimatedTargetPitch
+        );
+
+        return estimatedTargetDistance;
+      }
+    }
+    return -1.0;
   }
 
   /**

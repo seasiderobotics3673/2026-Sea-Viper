@@ -19,9 +19,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -41,6 +43,8 @@ public class RobotContainer
   final         CommandXboxController driverXbox = new CommandXboxController(0);
 
   final         CommandXboxController logitechController = new CommandXboxController(2);
+
+  final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/SeaViper"));
@@ -206,7 +210,8 @@ public class RobotContainer
 
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraEnum));
-      
+
+      brodieBox2026.button(3).onTrue(new moveToTargetDistance(125, drivebase, vision, -1));
     }
 
   }
