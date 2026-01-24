@@ -646,7 +646,7 @@ public class SwerveSubsystem extends SubsystemBase
 
     return swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(),
                                                         scaledInputs.getY(),
-                                                        angle.getRadians(),
+                                                        -angle.getRadians(),
                                                         getHeading().getRadians(),
                                                         Constants.MAX_SPEED);
   }
