@@ -70,7 +70,6 @@ public final class Constants
     FIELD_LAYOUT.getTagPose(11).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(12).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(13).get().getTranslation().getZ(),
-    Units.inchesToMeters(18),
     FIELD_LAYOUT.getTagPose(14).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(15).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(16).get().getTranslation().getZ(),
@@ -81,7 +80,7 @@ public final class Constants
     FIELD_LAYOUT.getTagPose(21).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(22).get().getTranslation().getZ(),
     //After This is Unofficial Heights for Testing Purposes.
-
+    Units.inchesToMeters(18),
     Units.inchesToMeters(37.5)
   };
 

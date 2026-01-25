@@ -25,9 +25,17 @@ public class moveToTargetDistance extends Command {
   private boolean isRegardingSpecificID;
   private Cameras cameraEnum = Cameras.CENTER_CAM;
   private GeneralMethods generalMethods;
-  private ChassisSpeeds driveSpeed;
-  private int counter;
 
+  private ChassisSpeeds driveSpeeds;
+  private double driveSpeedX;
+  private double driveSpeedY;
+
+  private double yTolerance;
+  private double xTolerance;
+  private int directionInverse;
+
+  private int counter;
+  private boolean isFinishedFlag;
 
 
   /** Creates a new moveToTargetDistance. */
@@ -45,6 +53,13 @@ public class moveToTargetDistance extends Command {
   @Override
   public void initialize() {
 
+    yTolerance = 0.08;
+    xTolerance = 0.05;
+
+    directionInverse = 1;
+
+    isFinishedFlag = false;
+
     if (fiducialId == -1 || fiducialId == 0) {
       isRegardingSpecificID = false;
     } else {
@@ -56,26 +71,55 @@ public class moveToTargetDistance extends Command {
   @Override
   public void execute() {
 
+    apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
+
     counter++;
 
     if (counter >= 20) {
-      System.out.println(apriltagTrans2d.getY());
+      System.out.println("Estimated X: " + apriltagTrans2d.getX());
+      System.out.println("Estimated Y: " + apriltagTrans2d.getY());
       counter = 0;
     }
 
-    apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
+    //If our target distance is farther away from the Apriltag than we are currently
+    if (destDistance > apriltagTrans2d.getX()) {
+      directionInverse = -1;
+    } else {
+      //If the target distance is closer to the Apriltag than we are currently
+      directionInverse = 1;
+    }
 
-    //if (apriltagTrans2d.getY() <= -0.08 || apriltagTrans2d.getY() >= 0.08) {
-      if (generalMethods.compareToTolerance(0.0, 0.08, apriltagTrans2d.getY(), true)) {
-        if (apriltagTrans2d.getY() >= 0) {
-          driveSpeed = new ChassisSpeeds(0, Constants.MAX_SPEED/6, 0);
-        } else {
-          driveSpeed = new ChassisSpeeds(0, -Constants.MAX_SPEED/6, 0);
-        }
+    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTrans2d.getY(), true)) {
+
+      if (apriltagTrans2d.getY() >= 0) {
+        driveSpeedY = Constants.MAX_SPEED/6;
       } else {
-        driveSpeed = new ChassisSpeeds(0,0,0);
+        driveSpeedY = -Constants.MAX_SPEED/6;
       }
-    drivebase.drive(driveSpeed);
+
+    } else {
+      driveSpeedY = 0.0;
+    }
+
+    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTrans2d.getX(), true)) {
+
+      if (apriltagTrans2d.getX() >= 0) {
+        driveSpeedX = Constants.MAX_SPEED/6 * directionInverse;
+      } else { 
+        driveSpeedX = -Constants.MAX_SPEED/6 * directionInverse;
+      }
+
+    } else {
+      driveSpeedX = 0.0;
+    }
+
+    if (Double.compare(driveSpeedX, 0.0) == 0 && 
+        Double.compare(driveSpeedY, 0.0) == 0 && 
+        !apriltagTrans2d.equals(new Translation2d())) { isFinishedFlag = true; }
+
+    driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, 0);
+
+    drivebase.drive(driveSpeeds);
   }
 
   // Called once the command ends or is interrupted.
@@ -85,6 +129,6 @@ public class moveToTargetDistance extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return isFinishedFlag;
   }
 }
