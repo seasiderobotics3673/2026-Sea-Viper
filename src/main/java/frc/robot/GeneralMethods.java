@@ -9,10 +9,7 @@ public class GeneralMethods {
 
     //"isBlacklist" determines whether the function returns true if comparisonNumber is inside the tolerance (a whitelist) or false (a blacklist)
 
-    public boolean compareToTolerance(Double initialNumber, Double range, Double comparisonNumber, boolean isBlacklist) {
-        double negativeTolerance = initialNumber - range;
-        double positiveTolerance = initialNumber + range;
-
+    public boolean compareToTolerance(Double negativeTolerance, Double positiveTolerance, Double comparisonNumber, boolean isBlacklist) {
         if (isBlacklist) {
             if (comparisonNumber <= negativeTolerance || comparisonNumber >= positiveTolerance) {
                 return true;
