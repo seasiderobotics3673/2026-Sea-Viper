@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.GeneralMethods;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -23,10 +24,10 @@ public class moveToTargetDistance extends Command {
   private int fiducialId;
   private boolean isRegardingSpecificID;
   private Cameras cameraEnum = Cameras.CENTER_CAM;
-  private double destAngle;
-  private double tolerance;
+  private GeneralMethods generalMethods;
   private ChassisSpeeds driveSpeed;
   private int counter;
+
 
 
   /** Creates a new moveToTargetDistance. */
@@ -64,16 +65,16 @@ public class moveToTargetDistance extends Command {
 
     apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
 
-    //if (-0.1 >= apriltagTrans2d.getY() || apriltagTrans2d.getY() >= 0.1) {
-    if (apriltagTrans2d.getY() <= -0.08 || apriltagTrans2d.getY() >= 0.08) {
-      if (apriltagTrans2d.getY() >= 0) {
-        driveSpeed = new ChassisSpeeds(0, Constants.MAX_SPEED/6, 0);
+    //if (apriltagTrans2d.getY() <= -0.08 || apriltagTrans2d.getY() >= 0.08) {
+      if (generalMethods.compareToTolerance(0.0, 0.08, apriltagTrans2d.getY(), true)) {
+        if (apriltagTrans2d.getY() >= 0) {
+          driveSpeed = new ChassisSpeeds(0, Constants.MAX_SPEED/6, 0);
+        } else {
+          driveSpeed = new ChassisSpeeds(0, -Constants.MAX_SPEED/6, 0);
+        }
       } else {
-        driveSpeed = new ChassisSpeeds(0, -Constants.MAX_SPEED/6, 0);
+        driveSpeed = new ChassisSpeeds(0,0,0);
       }
-    } else {
-      driveSpeed = new ChassisSpeeds(0,0,0);
-    }
     drivebase.drive(driveSpeed);
   }
 
