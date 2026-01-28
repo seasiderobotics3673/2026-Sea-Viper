@@ -60,6 +60,8 @@ public class moveToTargetDistance extends Command {
 
     isFinishedFlag = false;
 
+    generalMethods = new GeneralMethods();
+
     if (fiducialId == -1 || fiducialId == 0) {
       isRegardingSpecificID = false;
     } else {

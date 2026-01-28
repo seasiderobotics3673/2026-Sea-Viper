@@ -155,6 +155,9 @@ public class Robot extends TimedRobot
     {
       CommandScheduler.getInstance().cancelAll();
     }
+
+    System.out.println(Constants.APRILTAG_HEIGHTS[0]);
+
   }
 
   /**
