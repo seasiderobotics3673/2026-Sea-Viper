@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import swervelib.math.Matter;
@@ -52,7 +54,7 @@ public final class Constants
   }
   
   
-  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+  public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
   //Measured as the distance from the floor to the center of the Apriltag, in meters.
   public static final double[] APRILTAG_HEIGHTS = 
@@ -79,9 +81,50 @@ public final class Constants
     FIELD_LAYOUT.getTagPose(20).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(21).get().getTranslation().getZ(),
     FIELD_LAYOUT.getTagPose(22).get().getTranslation().getZ(),
-    //After This is Unofficial Heights for Testing Purposes.
-    Units.inchesToMeters(18),
-    Units.inchesToMeters(37.5)
+    FIELD_LAYOUT.getTagPose(23).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(24).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(25).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(26).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(27).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(28).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(29).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(30).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(31).get().getTranslation().getZ(),
+    FIELD_LAYOUT.getTagPose(32).get().getTranslation().getZ(),
   };
 
+  public static final Pose3d[] APRILTAG_POSES = {
+    FIELD_LAYOUT.getTagPose(1).get(),
+    FIELD_LAYOUT.getTagPose(2).get(),
+    FIELD_LAYOUT.getTagPose(3).get(),
+    FIELD_LAYOUT.getTagPose(4).get(),
+    FIELD_LAYOUT.getTagPose(5).get(),
+    FIELD_LAYOUT.getTagPose(6).get(),
+    FIELD_LAYOUT.getTagPose(7).get(),
+    FIELD_LAYOUT.getTagPose(8).get(),
+    FIELD_LAYOUT.getTagPose(9).get(),
+    FIELD_LAYOUT.getTagPose(10).get(),
+    FIELD_LAYOUT.getTagPose(11).get(),
+    FIELD_LAYOUT.getTagPose(12).get(),
+    FIELD_LAYOUT.getTagPose(13).get(),
+    FIELD_LAYOUT.getTagPose(14).get(),
+    FIELD_LAYOUT.getTagPose(15).get(),
+    FIELD_LAYOUT.getTagPose(16).get(),
+    FIELD_LAYOUT.getTagPose(17).get(),
+    FIELD_LAYOUT.getTagPose(18).get(),
+    FIELD_LAYOUT.getTagPose(19).get(),
+    FIELD_LAYOUT.getTagPose(20).get(),
+    FIELD_LAYOUT.getTagPose(21).get(),
+    FIELD_LAYOUT.getTagPose(22).get(),
+    FIELD_LAYOUT.getTagPose(23).get(),
+    FIELD_LAYOUT.getTagPose(24).get(),
+    FIELD_LAYOUT.getTagPose(25).get(),
+    FIELD_LAYOUT.getTagPose(26).get(),
+    FIELD_LAYOUT.getTagPose(27).get(),
+    FIELD_LAYOUT.getTagPose(28).get(),
+    FIELD_LAYOUT.getTagPose(29).get(),
+    FIELD_LAYOUT.getTagPose(30).get(),
+    FIELD_LAYOUT.getTagPose(31).get(),
+    FIELD_LAYOUT.getTagPose(32).get()
+  };
 }
