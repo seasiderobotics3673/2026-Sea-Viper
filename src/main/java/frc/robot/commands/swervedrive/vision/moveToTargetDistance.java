@@ -43,8 +43,8 @@ public class moveToTargetDistance extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
     this.destDistance = destDistance;
     this.drivebase = drivebase;
-    this.fiducialId = fiducialId;
     this.vision = vision;
+    this.fiducialId = fiducialId;
 
     addRequirements(drivebase);
   }
@@ -62,7 +62,7 @@ public class moveToTargetDistance extends Command {
 
     generalMethods = new GeneralMethods();
 
-    if (fiducialId == -1 || fiducialId == 0) {
+    if (fiducialId <= 0 || fiducialId > Constants.APRILTAG_HEIGHTS.length) {
       isRegardingSpecificID = false;
     } else {
       isRegardingSpecificID = true;
