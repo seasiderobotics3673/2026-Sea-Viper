@@ -34,17 +34,23 @@ public class moveToTargetDistance extends Command {
   private double xTolerance;
   private int directionInverse;
 
+  private double xAdjustment;
+  private double yAdjustment;
+  private Translation2d offsetPoint;
+  private Translation2d aprilTagAdjustedPos;
+
   private int counter;
   private boolean isFinishedFlag;
 
 
   /** Creates a new moveToTargetDistance. */
-  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId) {
+  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId, Translation2d offsetPoint) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.destDistance = destDistance;
     this.drivebase = drivebase;
     this.vision = vision;
     this.fiducialId = fiducialId;
+    this.offsetPoint = offsetPoint;
 
     addRequirements(drivebase);
   }
@@ -75,23 +81,30 @@ public class moveToTargetDistance extends Command {
 
     apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
 
+    xAdjustment = offsetPoint.getX() - vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX();
+    yAdjustment = offsetPoint.getY() - vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY();
+    //xAdjustment = vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX() - offsetPoint.getX();
+    //yAdjustment = vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY() - offsetPoint.getY();
+
+    aprilTagAdjustedPos = new Translation2d(apriltagTrans2d.getX() + xAdjustment, apriltagTrans2d.getY() + yAdjustment);
+
     counter++;
 
-    if (counter >= 20) {
-      System.out.println("Estimated X: " + apriltagTrans2d.getX());
-      System.out.println("Estimated Y: " + apriltagTrans2d.getY());
+    if (counter >= 10) {
+      System.out.println("Estimated X: " + aprilTagAdjustedPos.getX());
+      System.out.println("Estimated Y: " + aprilTagAdjustedPos.getY());
       counter = 0;
     }
 
     //If our target distance is farther away from the Apriltag than we are currently
-    if (destDistance > apriltagTrans2d.getX()) {
+    if (destDistance > aprilTagAdjustedPos.getX()) {
       directionInverse = -1;
     } else {
       //If the target distance is closer to the Apriltag than we are currently
       directionInverse = 1;
     }
 
-    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTrans2d.getY(), true)) {
+    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, aprilTagAdjustedPos.getY(), true)) {
 
       if (apriltagTrans2d.getY() >= 0) {
         driveSpeedY = Constants.MAX_SPEED/6;
@@ -103,7 +116,7 @@ public class moveToTargetDistance extends Command {
       driveSpeedY = 0.0;
     }
 
-    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTrans2d.getX(), true)) {
+    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), aprilTagAdjustedPos.getX(), true)) {
 
       if (apriltagTrans2d.getX() >= 0) {
         driveSpeedX = Constants.MAX_SPEED/6 * directionInverse;

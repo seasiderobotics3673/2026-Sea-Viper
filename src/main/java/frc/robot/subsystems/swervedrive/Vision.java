@@ -419,6 +419,13 @@ public class Vision
     return -1.0;
   }
 
+  //Should provide the actual camera name, not the name property of the camera-- OFFSET_CAMERA instead of offsetCamera
+  public Transform3d getCameraTransform(Cameras cameraEnum, String cameraName) {
+    //Cameras specificCamera = Cameras.valueOf(cameraName);
+    //return specificCamera.robotToCamTransform;
+    return Cameras.OFFSET_CAM.robotToCamTransform;
+  }
+
   /**
    * Camera Enum to select each camera
    */

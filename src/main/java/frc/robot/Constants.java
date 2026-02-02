@@ -29,7 +29,7 @@ public final class Constants
   // Maximum speed of the robot in meters per second, used to limit acceleration.
   public static final double MAX_SPEED  = Units.feetToMeters(14.5);
 
-  public static final Translation2d FRONT_EDGE_TRANSLATION2D = new Translation2d(Units.inchesToMeters(13.25), Units.inchesToMeters(0));
+  public static final Translation2d FRONT_EDGE_TRANSLATION2D = new Translation2d(Units.inchesToMeters(14.25), Units.inchesToMeters(0));
   public static final Translation2d BACK_EDGE_TRANSLATION2D = new Translation2d(Units.inchesToMeters(-13.25), Units.inchesToMeters(0));
   public static final Translation2d CENTER_TRANSLATION2D = new Translation2d();
 
