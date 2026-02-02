@@ -51,7 +51,9 @@ public class RobotContainer
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
-  private final Cameras cameraEnum = Cameras.CENTER_CAM;
+  private final Cameras cameraCenterEnum = Cameras.CENTER_CAM;
+
+  private final Cameras cameraOffsetEnum = Cameras.OFFSET_CAM;
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser;
@@ -209,9 +211,9 @@ public class RobotContainer
       driverXbox.rightBumper().onTrue(Commands.none());
 
       logitechController.a()
-        .whileTrue(drivebase.aimAtTarget(cameraEnum));
+        .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
-      brodieBox2026.button(3).onTrue(new moveToTargetDistance(1.2, drivebase, vision, 23));
+      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 0));
     }
 
   }
@@ -225,8 +227,12 @@ public class RobotContainer
     return vision;
   }
 
-  public Cameras getCameraEnum() {
-    return cameraEnum;
+  public Cameras getCameraCenterEnum() {
+    return cameraCenterEnum;
+  }
+
+  public Cameras getCameraOffsetEnum() {
+    return cameraOffsetEnum;
   }
 
   /**

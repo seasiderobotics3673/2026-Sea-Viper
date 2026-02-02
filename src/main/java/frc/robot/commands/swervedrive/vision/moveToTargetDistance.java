@@ -23,7 +23,7 @@ public class moveToTargetDistance extends Command {
   private Translation2d apriltagTrans2d;
   private int fiducialId;
   private boolean isRegardingSpecificID;
-  private Cameras cameraEnum = Cameras.CENTER_CAM;
+  private Cameras cameraEnum = Cameras.OFFSET_CAM;
   private GeneralMethods generalMethods;
 
   private ChassisSpeeds driveSpeeds;

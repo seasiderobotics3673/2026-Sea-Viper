@@ -361,7 +361,7 @@ public class Vision
     }
     double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
     (
-      Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+      Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
       targetHeight, 
       cameraPitch,
       estimatedTargetPitch
@@ -384,7 +384,7 @@ public class Vision
         double targetHeight = Constants.APRILTAG_HEIGHTS[result.getBestTarget().getFiducialId() - 1]; //Dummy Value; Change Later
         double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
         (
-          Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+          Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
           targetHeight, 
           0.0,
           estimatedTargetPitch
@@ -407,7 +407,7 @@ public class Vision
         double targetHeight = Constants.APRILTAG_HEIGHTS[fiducialId - 1]; //Dummy Value; Change Later
         double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
         (
-          Cameras.CENTER_CAM.robotToCamTransform.getZ(),
+          Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
           targetHeight, 
           0.0,
           estimatedTargetPitch
@@ -434,27 +434,27 @@ public class Vision
                                Units.inchesToMeters(10.981),
                                Units.inchesToMeters(8.44)),
              VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-    */
+    
     /**
      * Right Camera
      */
-    /*
-    RIGHT_CAM("right",
-              new Rotation3d(0, Math.toRadians(-24.094), Math.toRadians(-30)),
-              new Translation3d(Units.inchesToMeters(12.056),
-                                Units.inchesToMeters(-10.981),
-                                Units.inchesToMeters(8.44)),
+    
+    OFFSET_CAM("offsetCamera",
+              new Rotation3d(0, 0, 0),
+              new Translation3d(Units.inchesToMeters(7.0),
+                                Units.inchesToMeters(7.75),
+                                Units.inchesToMeters(29)),
               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
-    */
     /**
      * Center Camera
      */
     CENTER_CAM("centerCam",
-               new Rotation3d(0, 0, 0),
+               new Rotation3d(0, 30, 0),
                new Translation3d(Units.inchesToMeters(13.25),
                                  0,
                                  Units.inchesToMeters(11.00)),
                VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1));
+
 
     /**
      * Latency alert to use when high latency is detected.
