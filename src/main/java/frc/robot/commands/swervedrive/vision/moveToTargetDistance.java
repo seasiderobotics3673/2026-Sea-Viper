@@ -34,10 +34,10 @@ public class moveToTargetDistance extends Command {
   private double xTolerance;
   private int directionInverse;
 
-  private double xAdjustment;
-  private double yAdjustment;
   private Translation2d offsetPoint;
   private Translation2d aprilTagAdjustedPos;
+  private Translation2d camera2dPos;
+  private Translation2d posAdjustment;
 
   private int counter;
   private boolean isFinishedFlag;
@@ -68,6 +68,11 @@ public class moveToTargetDistance extends Command {
 
     generalMethods = new GeneralMethods();
 
+    camera2dPos = new Translation2d(
+      vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX(),
+      vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY()
+    );
+
     if (fiducialId <= 0 || fiducialId > Constants.APRILTAG_HEIGHTS.length) {
       isRegardingSpecificID = false;
     } else {
@@ -81,13 +86,10 @@ public class moveToTargetDistance extends Command {
 
     apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
 
-    xAdjustment = offsetPoint.getX() - vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX();
-    yAdjustment = offsetPoint.getY() - vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY();
-    //xAdjustment = vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX() - offsetPoint.getX();
-    //yAdjustment = vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY() - offsetPoint.getY();
-
-    aprilTagAdjustedPos = new Translation2d(apriltagTrans2d.getX() + xAdjustment, apriltagTrans2d.getY() + yAdjustment);
-
+    //posAdjustment = camera2dPos.minus(offsetPoint); - I think the other one is correct-- try this if it isnt
+    posAdjustment = offsetPoint.minus(camera2dPos);
+    aprilTagAdjustedPos = apriltagTrans2d.plus(posAdjustment);
+ 
     counter++;
 
     if (counter >= 10) {
