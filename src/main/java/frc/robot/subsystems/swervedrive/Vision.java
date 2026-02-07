@@ -396,6 +396,29 @@ public class Vision
     return -1.0;
   }
 
+  public Transform3d getTargetTransform(Cameras cameraEnum) {
+    Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
+
+    if (result0.isEmpty()) {
+      DriverStation.reportWarning("Get Target Pose Failed; Is Your Camera On?", false);
+      return new Transform3d();
+    }
+
+    var result = result0.get();
+
+    if (!result.hasTargets()) {
+      DriverStation.reportWarning("Get Target Pose called with no targets in sight.", false);
+      return new Transform3d();
+    }
+
+    PhotonTrackedTarget target = result.getBestTarget();
+
+    Transform3d pose = target.bestCameraToTarget;
+
+    return pose;
+
+  }
+
       //Inaccurate at lower target pitches.
   public double getDistanceToTargetID(Cameras camera, int fiducialId) {
     Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
@@ -417,6 +440,31 @@ public class Vision
       }
     }
     return -1.0;
+  }
+
+  public Transform3d getTargetPosOffset(Cameras camera, Translation2d offsetPoint, boolean isSpecificID, int fiducialId) {
+    Transform3d camRelativeTargetPos = getTargetTransform(camera);
+    Transform3d robotFrameVector = camRelativeTargetPos;
+
+    Rotation2d camRotation = new Rotation2d(camera.robotToCamTransform.getRotation().getZ()); //Yaw Only
+
+    /*
+    double epsilon = 1e-9; //Small tolerance for floating point comparison.
+
+    //Rotate frame of reference if camera is at an angle.
+    if (Math.abs(camRotation.getRadians()) > epsilon) {
+      //robotFrameVector = camRelativeTargetPos.rotateBy(camRotation);
+    }
+    */
+    double camRelativeTargetX = robotFrameVector.getX();
+    double camRelativeTargetY = robotFrameVector.getY();
+
+    double targetX = camRelativeTargetX + Cameras.CENTER_CAM.robotToCamTransform.getX();
+    double targetY = camRelativeTargetY + Cameras.CENTER_CAM.robotToCamTransform.getY();
+
+    //System.out.println(new Translation2d(targetX, targetY));
+    //return new Translation2d(targetX, targetY);
+    return new Transform3d();
   }
 
   //Should provide the actual camera name, not the name property of the camera-- OFFSET_CAMERA instead of offsetCamera

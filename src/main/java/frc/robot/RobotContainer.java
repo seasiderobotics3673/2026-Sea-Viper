@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
+import frc.robot.commands.swervedrive.vision.testCommand;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -214,6 +215,8 @@ public class RobotContainer
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
       brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 0, Constants.FRONT_EDGE_TRANSLATION2D));
+
+      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION2D, false, 0, vision));
     }
 
   }
