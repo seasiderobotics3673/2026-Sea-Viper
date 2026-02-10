@@ -4,7 +4,10 @@
 
 package frc.robot.commands.swervedrive.vision;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -20,7 +23,8 @@ public class moveToTargetDistance extends Command {
   private Vision vision;
 
   private double destDistance;
-  private Translation2d apriltagTrans2d;
+  private double desiredHeading;
+  private Transform3d apriltagTransform3d;
   private int fiducialId;
   private boolean isRegardingSpecificID;
   private Cameras cameraEnum = Cameras.OFFSET_CAM;
@@ -29,28 +33,30 @@ public class moveToTargetDistance extends Command {
   private ChassisSpeeds driveSpeeds;
   private double driveSpeedX;
   private double driveSpeedY;
+  private double rotationSpeed;
 
   private double yTolerance;
   private double xTolerance;
+  private double rotationTolerance;
   private int directionInverse;
 
-  private Translation2d offsetPoint;
-  private Translation2d aprilTagAdjustedPos;
-  private Translation2d camera2dPos;
-  private Translation2d posAdjustment;
+  private Rotation2d currentHeading;
+
+  private Translation3d offsetPoint;
 
   private int counter;
   private boolean isFinishedFlag;
 
 
   /** Creates a new moveToTargetDistance. */
-  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId, Translation2d offsetPoint) {
+  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId, Translation3d offsetPoint, double desiredHeading) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.destDistance = destDistance;
     this.drivebase = drivebase;
     this.vision = vision;
     this.fiducialId = fiducialId;
     this.offsetPoint = offsetPoint;
+    this.desiredHeading = desiredHeading;
 
     addRequirements(drivebase);
   }
@@ -61,17 +67,13 @@ public class moveToTargetDistance extends Command {
 
     yTolerance = 0.08;
     xTolerance = 0.05;
+    rotationTolerance = 1.25;
 
     directionInverse = 1;
 
     isFinishedFlag = false;
 
     generalMethods = new GeneralMethods();
-
-    camera2dPos = new Translation2d(
-      vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getX(),
-      vision.getCameraTransform(cameraEnum, "OFFSET_CAMERA").getY()
-    );
 
     if (fiducialId <= 0 || fiducialId > Constants.APRILTAG_HEIGHTS.length) {
       isRegardingSpecificID = false;
@@ -84,43 +86,32 @@ public class moveToTargetDistance extends Command {
   @Override
   public void execute() {
 
-    apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
 
-    //posAdjustment = camera2dPos.minus(offsetPoint); - I think the other one is correct-- try this if it isnt
-    posAdjustment = offsetPoint.minus(camera2dPos);
-    aprilTagAdjustedPos = apriltagTrans2d.plus(posAdjustment);
- 
+
+    //apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
+    apriltagTransform3d = vision.getTargetTransformOffset(cameraEnum, offsetPoint, isRegardingSpecificID, fiducialId);
+
     counter++;
 
     if (counter >= 10) {
-      System.out.println("Estimated X: " + aprilTagAdjustedPos.getX());
-      System.out.println("Estimated Y: " + aprilTagAdjustedPos.getY());
+      System.out.println("Estimated X: " + apriltagTransform3d.getX());
+      System.out.println("Estimated Y: " + apriltagTransform3d.getY());
       counter = 0;
     }
 
     //If our target distance is farther away from the Apriltag than we are currently
-    if (destDistance > aprilTagAdjustedPos.getX()) {
+    if (destDistance > apriltagTransform3d.getX()) {
       directionInverse = -1;
     } else {
       //If the target distance is closer to the Apriltag than we are currently
       directionInverse = 1;
     }
 
-    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, aprilTagAdjustedPos.getY(), true)) {
+    currentHeading = drivebase.getHeading();
 
-      if (apriltagTrans2d.getY() >= 0) {
-        driveSpeedY = Constants.MAX_SPEED/6;
-      } else {
-        driveSpeedY = -Constants.MAX_SPEED/6;
-      }
+    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTransform3d.getX(), true)) {
 
-    } else {
-      driveSpeedY = 0.0;
-    }
-
-    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), aprilTagAdjustedPos.getX(), true)) {
-
-      if (apriltagTrans2d.getX() >= 0) {
+      if (apriltagTransform3d.getX() >= 0) {
         driveSpeedX = Constants.MAX_SPEED/6 * directionInverse;
       } else { 
         driveSpeedX = -Constants.MAX_SPEED/6 * directionInverse;
@@ -130,18 +121,47 @@ public class moveToTargetDistance extends Command {
       driveSpeedX = 0.0;
     }
 
+    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTransform3d.getY(), true)) {
+
+      if (apriltagTransform3d.getY() >= 0) {
+        driveSpeedY = Constants.MAX_SPEED/6;
+      } else {
+        driveSpeedY = -Constants.MAX_SPEED/6;
+      }
+
+    } else {
+      driveSpeedY = 0.0;
+    }
+
+    if (generalMethods.compareToTolerance(
+      (desiredHeading - rotationTolerance), 
+      (desiredHeading + rotationTolerance), 
+      currentHeading.getDegrees(), 
+      true)) {
+        if (currentHeading.getDegrees() >= 0) {
+          rotationSpeed = -Constants.MAX_ANGULAR_SPEED/4;
+        } else {
+          rotationSpeed = Constants.MAX_ANGULAR_SPEED/4;
+        }
+      } else {
+        rotationSpeed = 0.0;
+      }
+
     if (Double.compare(driveSpeedX, 0.0) == 0 && 
         Double.compare(driveSpeedY, 0.0) == 0 && 
-        !apriltagTrans2d.equals(new Translation2d())) { isFinishedFlag = true; }
+        !apriltagTransform3d.equals(new Transform3d())) { isFinishedFlag = true; }
 
-    driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, 0);
+    driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, rotationSpeed);
 
     drivebase.drive(driveSpeeds);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    System.out.println("Command Ended");
+    System.out.println("");
+  }
 
   // Returns true when the command should end.
   @Override

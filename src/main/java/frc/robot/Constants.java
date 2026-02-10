@@ -28,9 +28,10 @@ public final class Constants
   public static final double LOOP_TIME  = 0.13; //s, 20ms + 110ms sprk max velocity lag
   // Maximum speed of the robot in meters per second, used to limit acceleration.
   public static final double MAX_SPEED  = Units.feetToMeters(14.5);
+    public static final double MAX_ANGULAR_SPEED = Math.PI; // 1/2 rotation per second
 
-  public static final Translation3d FRONT_EDGE_TRANSLATION3D = new Translation3d(Units.inchesToMeters(14.25), Units.inchesToMeters(0), Units.inchesToMeters(2.25));
-  public static final Translation3d BACK_EDGE_TRANSLATION3D = new Translation3d(Units.inchesToMeters(-14.25), Units.inchesToMeters(0), Units.inchesToMeters(2.25));
+  public static final Translation3d FRONT_EDGE_TRANSLATION3D = new Translation3d(Units.inchesToMeters(14.25), Units.inchesToMeters(0), Units.inchesToMeters(0));
+  public static final Translation3d BACK_EDGE_TRANSLATION3D = new Translation3d(Units.inchesToMeters(-14.25), Units.inchesToMeters(0), Units.inchesToMeters(0));
   public static final Translation3d CENTER_TRANSLATION3D = new Translation3d();
 
   public static final Translation2d FRONT_EDGE_TRANSLATION2D = new Translation2d(Units.inchesToMeters(14.25), Units.inchesToMeters(0));

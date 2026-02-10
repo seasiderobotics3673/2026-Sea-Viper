@@ -5,8 +5,10 @@
 package frc.robot.commands.swervedrive.vision;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 
@@ -17,16 +19,18 @@ public class testCommand extends InstantCommand {
 
   private Vision vision;
   private Cameras cameraEnum;
-  private Translation2d offsetPoint;
+  private Translation3d offsetPoint;
   private boolean isSpecificID;
   private int fiducialId;
+  private SwerveSubsystem drivebase;
 
-  public testCommand(Cameras cameraEnum, Translation2d offsetPoint, boolean isSpecificID, int fiducialId, Vision vision) {
+  public testCommand(Cameras cameraEnum, Translation3d offsetPoint, boolean isSpecificID, int fiducialId, Vision vision, SwerveSubsystem drivebase) {
     this.cameraEnum = cameraEnum;
     this.offsetPoint = offsetPoint;
     this.isSpecificID = isSpecificID;
     this.fiducialId = fiducialId;
     this.vision = vision;
+    this.drivebase = drivebase;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -34,7 +38,8 @@ public class testCommand extends InstantCommand {
   @Override
   public void initialize() {
 
-    System.out.print("getTargetPos: " + vision.getTargetTransform(cameraEnum));
-    System.out.println("getTargetPosOffset: " + vision.getTargetPosOffset(cameraEnum, offsetPoint, isSpecificID, fiducialId));
+    System.out.println("getTargetPos: " + vision.getTargetTransform(cameraEnum).getTranslation() + " " + drivebase.getHeading());
+    System.out.println("");
+    System.out.println("getTargetPosOffset: " + vision.getTargetTransformOffset(cameraEnum, offsetPoint, isSpecificID, fiducialId).getTranslation());
   }
 }

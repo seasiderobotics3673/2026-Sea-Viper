@@ -442,11 +442,37 @@ public class Vision
     return -1.0;
   }
 
+  public Transform3d getTargetTransformOffset(Cameras camera, Translation3d offsetPoint, boolean isSpecificID, int fiducialId) {
+    Transform3d camRelativeTransform3d = getTargetTransform(camera);
+
+    if (camRelativeTransform3d.equals(new Transform3d())) {
+      return new Transform3d();
+    }
+
+    Rotation3d camRotation = camRelativeTransform3d.getRotation();
+
+    double camRelativeTargetX = camRelativeTransform3d.getX();
+    double camRelativeTargetY = camRelativeTransform3d.getY();
+    double camRelativeTargetZ = camRelativeTransform3d.getZ();
+
+    double originRelativeTargetX = camRelativeTargetX + Cameras.OFFSET_CAM.robotToCamTransform.getX();
+    double originRelativeTargetY = camRelativeTargetY - Cameras.OFFSET_CAM.robotToCamTransform.getY();
+    double originRelativeTargetZ = camRelativeTargetZ + Cameras.OFFSET_CAM.robotToCamTransform.getZ();
+
+    double offsetRelativeTargetX = originRelativeTargetX - offsetPoint.getX();
+    double offsetRelativeTargetY = originRelativeTargetY + offsetPoint.getY();
+    double offsetRelativeTargetZ = originRelativeTargetZ + offsetPoint.getZ();
+
+    //return new Transform3d(originRelativeTargetX, originRelativeTargetY, originRelativeTargetZ, camRotation);
+    return new Transform3d(offsetRelativeTargetX, offsetRelativeTargetY, offsetRelativeTargetZ, camRotation);
+  }
+
   public Transform3d getTargetPosOffset(Cameras camera, Translation2d offsetPoint, boolean isSpecificID, int fiducialId) {
     Transform3d camRelativeTargetPos = getTargetTransform(camera);
+
     Transform3d robotFrameVector = camRelativeTargetPos;
 
-    Rotation2d camRotation = new Rotation2d(camera.robotToCamTransform.getRotation().getZ()); //Yaw Only
+    //Rotation2d camRotation = new Rotation2d(camera.robotToCamTransform.getRotation().getZ()); //Yaw Only
 
     /*
     double epsilon = 1e-9; //Small tolerance for floating point comparison.
