@@ -4,11 +4,14 @@
 
 package frc.robot.commands.swervedrive.vision;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.GeneralMethods;
@@ -42,6 +45,8 @@ public class moveToTargetDistance extends Command {
 
   private Rotation2d currentHeading;
 
+  private ArrayList<Transform3d> previousTransforms;
+
   private Translation3d offsetPoint;
 
   private int counter;
@@ -73,6 +78,8 @@ public class moveToTargetDistance extends Command {
 
     isFinishedFlag = false;
 
+    previousTransforms = new ArrayList<Transform3d>(10);
+
     generalMethods = new GeneralMethods();
 
     if (fiducialId <= 0 || fiducialId > Constants.APRILTAG_HEIGHTS.length) {
@@ -91,11 +98,27 @@ public class moveToTargetDistance extends Command {
     //apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
     apriltagTransform3d = vision.getTargetTransformOffset(cameraEnum, offsetPoint, isRegardingSpecificID, fiducialId);
 
+    if (!apriltagTransform3d.equals(new Transform3d())) {
+      previousTransforms.add(apriltagTransform3d);
+    } else {
+        try {
+          DriverStation.reportWarning("apriltagTransform3d returned empty", false);
+          apriltagTransform3d = previousTransforms.get(previousTransforms.size() - 1);
+        } catch (IndexOutOfBoundsException exception) {
+          DriverStation.reportWarning("Attempted to get member from previousTransforms while empty", false);
+        }
+    }
+
+    if (previousTransforms.size() >= 5) {
+      previousTransforms.subList(1, previousTransforms.size()).clear();
+    }
+
     counter++;
 
     if (counter >= 10) {
-      System.out.println("Estimated X: " + apriltagTransform3d.getX());
-      System.out.println("Estimated Y: " + apriltagTransform3d.getY());
+      //System.out.println("Estimated X: " + apriltagTransform3d.getX());
+      //System.out.println("Estimated Y: " + apriltagTransform3d.getY());
+      System.out.println("Most Recent Transform: "+ previousTransforms.get(previousTransforms.size() - 1));
       counter = 0;
     }
 
