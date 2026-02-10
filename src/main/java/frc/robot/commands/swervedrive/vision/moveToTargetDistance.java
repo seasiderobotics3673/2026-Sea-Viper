@@ -87,6 +87,9 @@ public class moveToTargetDistance extends Command {
     } else {
       isRegardingSpecificID = true;
     }
+
+    drivebase.getSwerveDrive().setHeadingCorrection(true);
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -174,7 +177,8 @@ public class moveToTargetDistance extends Command {
         Double.compare(driveSpeedY, 0.0) == 0 && 
         !apriltagTransform3d.equals(new Transform3d())) { isFinishedFlag = true; }
 
-    driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, rotationSpeed);
+    //driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, rotationSpeed);
+    driveSpeeds = new ChassisSpeeds(driveSpeedX, driveSpeedY, 0);
 
     drivebase.drive(driveSpeeds);
   }
@@ -184,6 +188,8 @@ public class moveToTargetDistance extends Command {
   public void end(boolean interrupted) {
     System.out.println("Command Ended");
     System.out.println("");
+    drivebase.getSwerveDrive().setHeadingCorrection(false);
+
   }
 
   // Returns true when the command should end.
