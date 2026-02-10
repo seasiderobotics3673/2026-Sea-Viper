@@ -36,6 +36,9 @@ public final class Constants
 
   public static final Translation2d FRONT_EDGE_TRANSLATION2D = new Translation2d(Units.inchesToMeters(14.25), Units.inchesToMeters(0));
 
+  public static final double SWERVE_SPEED_FULL = 1.0;
+  public static final double SWERVE_SPEED_SLOW = 0.5;
+
 
   
 //  public static final class AutonConstants

@@ -19,10 +19,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.drivebase.SlowDown;
 import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
 import frc.robot.commands.swervedrive.vision.testCommand;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -149,8 +152,8 @@ public class RobotContainer
   private void configureBindings()
   {
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
-    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveRobotOrientedAngularVelocity  = drivebase.driveFieldOriented(driveRobotOriented);
+    Command driveFieldOrientedAnglularVelocity = new SequentialCommandGroup(new InstantCommand(() -> drivebase.setSpeedMultiplier(1.0)), drivebase.driveFieldOriented(driveAngularVelocity));
+    Command driveRobotOrientedAngularVelocity  = new SequentialCommandGroup(new InstantCommand(() -> drivebase.setSpeedMultiplier(-1.0)), drivebase.driveFieldOriented(driveRobotOriented));
     Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(
         driveDirectAngle);
     Command driveFieldOrientedDirectAngleKeyboard      = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
@@ -209,7 +212,7 @@ public class RobotContainer
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      driverXbox.rightBumper().toggleOnTrue(new SlowDown(drivebase));
 
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));

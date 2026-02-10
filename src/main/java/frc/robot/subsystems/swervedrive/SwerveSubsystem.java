@@ -69,6 +69,11 @@ public class SwerveSubsystem extends SubsystemBase
    */
   private       Vision      vision;
 
+  private double speedMultiplier = Constants.SWERVE_SPEED_FULL;
+  
+  //true is normal speed, false is slow speed
+  private boolean speedModifierToggle = true;
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -132,6 +137,22 @@ public class SwerveSubsystem extends SubsystemBase
   public void setupPhotonVision()
   {
     vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+  }
+
+  public void setSpeedMultiplier(double speedMultiplier) {
+    this.speedMultiplier = speedMultiplier;
+    System.out.println("Set Speed Multiplier To: " + speedMultiplier);
+  }
+
+  public void toggleSpeedMultiplier() {
+    boolean toggleFlag;
+    if (speedModifierToggle == true) {
+      toggleFlag = false;
+      setSpeedMultiplier(Constants.SWERVE_SPEED_SLOW);
+    } else {
+      toggleFlag = true;
+      setSpeedMultiplier(Constants.SWERVE_SPEED_FULL);
+    }
   }
 
   @Override
@@ -411,8 +432,8 @@ public class SwerveSubsystem extends SubsystemBase
     return run(() -> {
       // Make the robot move
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
+                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * speedMultiplier,
+                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * speedMultiplier), 0.8),
                         Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
                         true,
                         false);
