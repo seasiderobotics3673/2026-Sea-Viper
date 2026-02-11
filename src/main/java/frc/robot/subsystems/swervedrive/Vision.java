@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -396,7 +397,7 @@ public class Vision
     return -1.0;
   }
 
-  public Transform3d getTargetTransform(Cameras cameraEnum) {
+  public Transform3d getTargetTransform(Cameras cameraEnum, boolean isSpecificID, int fiducialId) {
     Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
 
     if (result0.isEmpty()) {
@@ -411,12 +412,35 @@ public class Vision
       return new Transform3d();
     }
 
+    var targetArray = new ArrayList<PhotonTrackedTarget>(10);
+    targetArray.addAll(result.getTargets());
+    
+    if (isSpecificID) {
+
+      if (fiducialId <= 0 || fiducialId > Constants.APRILTAG_HEIGHTS.length) {
+        DriverStation.reportWarning("getTargetTransform called while fiducialID is invalid", null);
+        return new Transform3d();
+      }
+
+      for (int index = 0; index < targetArray.size(); index++) {
+        boolean IDExists = (targetArray.get(index).getFiducialId() == fiducialId) ? true : false;
+        if (IDExists) {
+          PhotonTrackedTarget target = targetArray.get(index);
+
+          Transform3d pose = target.bestCameraToTarget;
+
+          return pose;
+        }
+      }
+      DriverStation.reportWarning("Specific ID Not Found", false);
+      return new Transform3d();
+    }
+
     PhotonTrackedTarget target = result.getBestTarget();
 
     Transform3d pose = target.bestCameraToTarget;
 
     return pose;
-
   }
 
       //Inaccurate at lower target pitches.
@@ -443,7 +467,7 @@ public class Vision
   }
 
   public Transform3d getTargetTransformOffset(Cameras camera, Translation3d offsetPoint, boolean isSpecificID, int fiducialId) {
-    Transform3d camRelativeTransform3d = getTargetTransform(camera);
+    Transform3d camRelativeTransform3d = getTargetTransform(camera, isSpecificID, fiducialId);
 
     if (camRelativeTransform3d.equals(new Transform3d())) {
       return new Transform3d();
@@ -465,32 +489,6 @@ public class Vision
 
     //return new Transform3d(originRelativeTargetX, originRelativeTargetY, originRelativeTargetZ, camRotation);
     return new Transform3d(offsetRelativeTargetX, offsetRelativeTargetY, offsetRelativeTargetZ, camRotation);
-  }
-
-  public Transform3d getTargetPosOffset(Cameras camera, Translation2d offsetPoint, boolean isSpecificID, int fiducialId) {
-    Transform3d camRelativeTargetPos = getTargetTransform(camera);
-
-    Transform3d robotFrameVector = camRelativeTargetPos;
-
-    //Rotation2d camRotation = new Rotation2d(camera.robotToCamTransform.getRotation().getZ()); //Yaw Only
-
-    /*
-    double epsilon = 1e-9; //Small tolerance for floating point comparison.
-
-    //Rotate frame of reference if camera is at an angle.
-    if (Math.abs(camRotation.getRadians()) > epsilon) {
-      //robotFrameVector = camRelativeTargetPos.rotateBy(camRotation);
-    }
-    */
-    double camRelativeTargetX = robotFrameVector.getX();
-    double camRelativeTargetY = robotFrameVector.getY();
-
-    double targetX = camRelativeTargetX + Cameras.CENTER_CAM.robotToCamTransform.getX();
-    double targetY = camRelativeTargetY + Cameras.CENTER_CAM.robotToCamTransform.getY();
-
-    //System.out.println(new Translation2d(targetX, targetY));
-    //return new Translation2d(targetX, targetY);
-    return new Transform3d();
   }
 
   //Should provide the actual camera name, not the name property of the camera-- OFFSET_CAMERA instead of offsetCamera

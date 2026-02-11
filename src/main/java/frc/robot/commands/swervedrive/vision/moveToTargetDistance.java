@@ -104,12 +104,16 @@ public class moveToTargetDistance extends Command {
     if (!apriltagTransform3d.equals(new Transform3d())) {
       previousTransforms.add(apriltagTransform3d);
     } else {
-        try {
+        if (previousTransforms.size() == 0) {
+          DriverStation.reportWarning("Attempted to get member from previousTransforms while empty", false);
+        } else {
           DriverStation.reportWarning("apriltagTransform3d returned empty", false);
           apriltagTransform3d = previousTransforms.get(previousTransforms.size() - 1);
-        } catch (IndexOutOfBoundsException exception) {
-          DriverStation.reportWarning("Attempted to get member from previousTransforms while empty", false);
         }
+    }
+
+    if (apriltagTransform3d.equals(new Transform3d()) && previousTransforms.size() == 0) {
+      isFinishedFlag = true;
     }
 
     if (previousTransforms.size() >= 5) {
@@ -121,7 +125,7 @@ public class moveToTargetDistance extends Command {
     if (counter >= 10) {
       //System.out.println("Estimated X: " + apriltagTransform3d.getX());
       //System.out.println("Estimated Y: " + apriltagTransform3d.getY());
-      System.out.println("Most Recent Transform: "+ previousTransforms.get(previousTransforms.size() - 1));
+      //System.out.println("Most Recent Transform: "+ previousTransforms.get(previousTransforms.size() - 1));
       counter = 0;
     }
 
@@ -138,9 +142,9 @@ public class moveToTargetDistance extends Command {
     if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTransform3d.getX(), true)) {
 
       if (apriltagTransform3d.getX() >= 0) {
-        driveSpeedX = Constants.MAX_SPEED/6 * directionInverse;
+        driveSpeedX = Constants.MAX_SPEED/4 * directionInverse;
       } else { 
-        driveSpeedX = -Constants.MAX_SPEED/6 * directionInverse;
+        driveSpeedX = -Constants.MAX_SPEED/4 * directionInverse;
       }
 
     } else {
@@ -150,9 +154,9 @@ public class moveToTargetDistance extends Command {
     if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTransform3d.getY(), true)) {
 
       if (apriltagTransform3d.getY() >= 0) {
-        driveSpeedY = Constants.MAX_SPEED/6;
+        driveSpeedY = Constants.MAX_SPEED*0.2;
       } else {
-        driveSpeedY = -Constants.MAX_SPEED/6;
+        driveSpeedY = -Constants.MAX_SPEED*0.2;
       }
 
     } else {
@@ -165,9 +169,9 @@ public class moveToTargetDistance extends Command {
       currentHeading.getDegrees(), 
       true)) {
         if (currentHeading.getDegrees() >= 0) {
-          rotationSpeed = -Constants.MAX_ANGULAR_SPEED/4;
+          rotationSpeed = -Constants.MAX_ANGULAR_SPEED*0.2;
         } else {
-          rotationSpeed = Constants.MAX_ANGULAR_SPEED/4;
+          rotationSpeed = Constants.MAX_ANGULAR_SPEED*0.2;
         }
       } else {
         rotationSpeed = 0.0;

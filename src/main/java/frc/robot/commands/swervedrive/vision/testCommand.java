@@ -38,7 +38,7 @@ public class testCommand extends InstantCommand {
   @Override
   public void initialize() {
 
-    System.out.println("getTargetPos: " + vision.getTargetTransform(cameraEnum).getTranslation() + " " + drivebase.getHeading());
+    System.out.println("getTargetPos: " + vision.getTargetTransform(cameraEnum, isSpecificID, fiducialId).getTranslation() + " " + drivebase.getHeading());
     System.out.println("");
     System.out.println("getTargetPosOffset: " + vision.getTargetTransformOffset(cameraEnum, offsetPoint, isSpecificID, fiducialId).getTranslation());
   }

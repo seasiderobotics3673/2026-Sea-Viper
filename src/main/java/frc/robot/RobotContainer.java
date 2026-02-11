@@ -217,9 +217,9 @@ public class RobotContainer
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
-      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 0, Constants.FRONT_EDGE_TRANSLATION3D, 0));
+      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 9, Constants.FRONT_EDGE_TRANSLATION3D, 0));
 
-      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
+      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 9, vision, drivebase));
     }
 
   }
