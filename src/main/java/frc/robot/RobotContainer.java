@@ -29,6 +29,8 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.swervedrive.drivebase.SlowDown;
 import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
 import frc.robot.commands.swervedrive.vision.testCommand;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -59,6 +61,10 @@ public class RobotContainer
   private final Cameras cameraCenterEnum = Cameras.CENTER_CAM;
 
   private final Cameras cameraOffsetEnum = Cameras.OFFSET_CAM;
+
+  private final Shooter shooter = new Shooter();
+
+  private final Intake intake = new Intake();
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser;
@@ -221,6 +227,24 @@ public class RobotContainer
       brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
 
       brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 10, vision, drivebase));
+
+      //Belt Set Speed
+      brodieBox2026.button(4)
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.3)))
+        .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
+      
+      //Deploy Speed (Keep Low)
+      brodieBox2026.button(5)
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.5)))
+        .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
+
+      brodieBox2026.button(6)
+        .toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)))
+        .toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
+    
+      brodieBox2026.button(7)
+        .onTrue(new InstantCommand(()-> intake.setDeploySpeed(0.1)))
+        .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
     }
 
   }
