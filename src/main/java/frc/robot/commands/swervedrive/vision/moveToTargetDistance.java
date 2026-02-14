@@ -47,20 +47,22 @@ public class moveToTargetDistance extends Command {
 
   private ArrayList<Transform3d> previousTransforms;
 
-  private Translation3d offsetPoint;
+  private Translation3d offsetPointBot;
+  private Translation3d offsetPointTag;
 
   private int counter;
   private boolean isFinishedFlag;
 
 
   /** Creates a new moveToTargetDistance. */
-  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId, Translation3d offsetPoint, double desiredHeading) {
+  public moveToTargetDistance(double destDistance, SwerveSubsystem drivebase, Vision vision, int fiducialId, Translation3d offsetPointBot, Translation3d offsetPointTag, double desiredHeading) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.destDistance = destDistance;
     this.drivebase = drivebase;
     this.vision = vision;
     this.fiducialId = fiducialId;
-    this.offsetPoint = offsetPoint;
+    this.offsetPointBot = offsetPointBot;
+    this.offsetPointTag = offsetPointTag;
     this.desiredHeading = desiredHeading;
 
     addRequirements(drivebase);
@@ -70,8 +72,8 @@ public class moveToTargetDistance extends Command {
   @Override
   public void initialize() {
 
-    yTolerance = 0.08;
-    xTolerance = 0.05;
+    yTolerance = 0.05;
+    xTolerance = 0.03;
     rotationTolerance = 1.25;
 
     directionInverse = 1;
@@ -99,7 +101,7 @@ public class moveToTargetDistance extends Command {
 
 
     //apriltagTrans2d = vision.getTargetPos(cameraEnum, isRegardingSpecificID, fiducialId);
-    apriltagTransform3d = vision.getTargetTransformOffset(cameraEnum, offsetPoint, isRegardingSpecificID, fiducialId);
+    apriltagTransform3d = vision.getTargetTransformOffset(cameraEnum, offsetPointBot, isRegardingSpecificID, fiducialId);
 
     if (!apriltagTransform3d.equals(new Transform3d())) {
       previousTransforms.add(apriltagTransform3d);
@@ -129,6 +131,8 @@ public class moveToTargetDistance extends Command {
       counter = 0;
     }
 
+    apriltagTransform3d = new Transform3d(apriltagTransform3d.getTranslation().plus(offsetPointTag), apriltagTransform3d.getRotation());
+
     //If our target distance is farther away from the Apriltag than we are currently
     if (destDistance > apriltagTransform3d.getX()) {
       directionInverse = -1;
@@ -142,9 +146,11 @@ public class moveToTargetDistance extends Command {
     if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTransform3d.getX(), true)) {
 
       if (apriltagTransform3d.getX() >= 0) {
-        driveSpeedX = Constants.MAX_SPEED/4 * directionInverse;
+        //driveSpeedX = Constants.MAX_SPEED/4 * directionInverse;
+        driveSpeedX = drivebase.scaleSpeed(apriltagTransform3d.getX(), destDistance, Constants.MAX_SPEED*0.5, 1) * directionInverse;
       } else { 
-        driveSpeedX = -Constants.MAX_SPEED/4 * directionInverse;
+        //driveSpeedX = -Constants.MAX_SPEED/4 * directionInverse;
+        driveSpeedX = -drivebase.scaleSpeed(apriltagTransform3d.getX(), destDistance, Constants.MAX_SPEED*0.5, 1) * directionInverse;
       }
 
     } else {
@@ -154,9 +160,11 @@ public class moveToTargetDistance extends Command {
     if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTransform3d.getY(), true)) {
 
       if (apriltagTransform3d.getY() >= 0) {
-        driveSpeedY = Constants.MAX_SPEED*0.2;
+        //driveSpeedY = Constants.MAX_SPEED*0.2;
+        driveSpeedY = drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.25, 0.5);
       } else {
-        driveSpeedY = -Constants.MAX_SPEED*0.2;
+        //driveSpeedY = -Constants.MAX_SPEED*0.2
+        driveSpeedY = -drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.25, 0.5);
       }
 
     } else {

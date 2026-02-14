@@ -621,6 +621,30 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   /**
+   * 
+   * Scales the given speed.
+   * 
+   * @param translation X or Y of the target, relative to the bot
+   * @param destDistance The destination distance
+   * @param maxSpeed The max speed
+   * @param fullSpeedDist the distance where we want our speed to be our max speed.
+   */
+  public double scaleSpeed(
+    double translation, //X or Y of target, relative to bot
+    double destDistance,
+    double maxSpeed,
+    double fullSpeedDist) 
+  {
+
+    double distanceToTarget;
+    distanceToTarget = (translation < destDistance) ? destDistance - translation : translation - destDistance;
+
+    double scale = Math.min(1.0, distanceToTarget / fullSpeedDist); //Can add a square to the end of this to smooth scaling
+
+    return maxSpeed * scale;
+  }
+
+  /**
    * Gets the current yaw angle of the robot, as reported by the swerve pose estimator in the underlying drivebase.
    * Note, this is not the raw gyro reading, this may be corrected from calls to resetOdometry().
    *

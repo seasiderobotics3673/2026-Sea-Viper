@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -217,9 +218,9 @@ public class RobotContainer
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
-      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 9, Constants.FRONT_EDGE_TRANSLATION3D, 0));
+      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
 
-      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 9, vision, drivebase));
+      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 10, vision, drivebase));
     }
 
   }
