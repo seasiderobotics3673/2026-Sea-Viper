@@ -26,7 +26,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.centerWithHUB;
+import frc.robot.commands.swervedrive.toggleLauncherMotor;
 import frc.robot.commands.swervedrive.drivebase.SlowDown;
+import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
 import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
 import frc.robot.commands.swervedrive.vision.testCommand;
 import frc.robot.subsystems.Intake;
@@ -224,9 +227,14 @@ public class RobotContainer
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
-      brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
+      //brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
+      brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 3, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D));
+      //brodieBox2026.button(3).onTrue()
 
       brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 10, vision, drivebase));
+
+
+      brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
 
       //Belt Set Speed
       brodieBox2026.button(4)
@@ -238,9 +246,9 @@ public class RobotContainer
         .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.5)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
 
-      brodieBox2026.button(6)
-        .toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)))
-        .toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
+      brodieBox2026.button(6).toggleOnTrue(new toggleLauncherMotor(shooter));
+        //.toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)));
+        //.toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
     
       brodieBox2026.button(7)
         .onTrue(new InstantCommand(()-> intake.setDeploySpeed(0.1)))

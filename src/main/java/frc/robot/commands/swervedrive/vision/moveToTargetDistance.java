@@ -161,10 +161,10 @@ public class moveToTargetDistance extends Command {
 
       if (apriltagTransform3d.getY() >= 0) {
         //driveSpeedY = Constants.MAX_SPEED*0.2;
-        driveSpeedY = drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.25, 0.5);
+        driveSpeedY = drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.4, 0.5);
       } else {
         //driveSpeedY = -Constants.MAX_SPEED*0.2
-        driveSpeedY = -drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.25, 0.5);
+        driveSpeedY = -drivebase.scaleSpeed(apriltagTransform3d.getY(), 0, Constants.MAX_SPEED*0.4, 0.5);
       }
 
     } else {

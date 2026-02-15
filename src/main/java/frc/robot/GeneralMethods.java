@@ -7,8 +7,13 @@ package frc.robot;
 /** Add your docs here. */
 public class GeneralMethods {
 
-    //"isBlacklist" determines whether the function returns true if comparisonNumber is inside the tolerance (a whitelist) or false (a blacklist)
-
+    /**
+     * @param negativeTolerance the negative tolerance 
+     * @param positiveTolerance the positive tolerance
+     * @param comparisonNumber the number to compare to the negative and positive tolerances
+     * @param isBlacklist determines whether the function returns true if comparisonNumber is inside the tolerance (a whitelist) or false (a blacklist)
+     * @return
+     */
     public boolean compareToTolerance(Double negativeTolerance, Double positiveTolerance, Double comparisonNumber, boolean isBlacklist) {
         if (isBlacklist) {
             if (comparisonNumber <= negativeTolerance || comparisonNumber >= positiveTolerance) {
