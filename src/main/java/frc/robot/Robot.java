@@ -58,7 +58,7 @@ public class Robot extends TimedRobot
 
     vision = m_robotContainer.getVision();
 
-    cameraEnum = m_robotContainer.getCameraEnum();
+    cameraEnum = m_robotContainer.getCameraOffsetEnum();
 
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
     // immediately when disabled, but then also let it be pushed more 
@@ -155,6 +155,9 @@ public class Robot extends TimedRobot
     {
       CommandScheduler.getInstance().cancelAll();
     }
+
+    System.out.println(Constants.APRILTAG_HEIGHTS[0]);
+
   }
 
   /**

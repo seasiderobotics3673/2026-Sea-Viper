@@ -4,35 +4,27 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
+  private TalonFX kickerMotor = new TalonFX(25);
+  private TalonFX launcherMotor = new TalonFX(15);
 
-  private SparkFlex shooterMotor = new SparkFlex(61, MotorType.kBrushless);
-
-  private SparkFlexConfig shooterMotorConfig = new SparkFlexConfig();
-
-  private double shooterMotorSpeed = 0.0;
-
-  public Shooter() {
-    shooterMotor.configure(shooterMotorConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-  }
+  public Shooter() {}
 
   @Override
   public void periodic() {
-    shooterMotor.set(shooterMotorSpeed);
+    // This method will be called once per scheduler run
   }
 
-  public void setSpeed(double shooterMotorSpeed) {
-    this.shooterMotorSpeed = shooterMotorSpeed;
-    shooterMotor.set(shooterMotorSpeed);
-  }
+  public void setKickerMotorSpeed(double speed){
+    kickerMotor.set(speed);
+  } 
 
+  public void setLauncherMotorSpeed(double speed){
+    launcherMotor.set(speed);
+  }
 }

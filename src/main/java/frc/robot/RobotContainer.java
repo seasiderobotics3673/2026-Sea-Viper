@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -19,9 +20,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.swervedrive.centerWithHUB;
+import frc.robot.commands.swervedrive.toggleLauncherMotor;
+import frc.robot.commands.swervedrive.drivebase.SlowDown;
+import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
+import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
+import frc.robot.commands.swervedrive.vision.testCommand;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -41,13 +53,21 @@ public class RobotContainer
   final         CommandXboxController driverXbox = new CommandXboxController(0);
 
   final         CommandXboxController logitechController = new CommandXboxController(2);
+
+  final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/SeaViper"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
-  private final Cameras cameraEnum = Cameras.CENTER_CAM;
+  private final Cameras cameraCenterEnum = Cameras.CENTER_CAM;
+
+  private final Cameras cameraOffsetEnum = Cameras.OFFSET_CAM;
+
+  private final Shooter shooter = new Shooter();
+
+  private final Intake intake = new Intake();
 
   // Establish a Sendable Chooser that will be able to be sent to the SmartDashboard, allowing selection of desired auto
   private final SendableChooser<Command> autoChooser;
@@ -142,8 +162,8 @@ public class RobotContainer
   private void configureBindings()
   {
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
-    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveRobotOrientedAngularVelocity  = drivebase.driveFieldOriented(driveRobotOriented);
+    Command driveFieldOrientedAnglularVelocity = new SequentialCommandGroup(new InstantCommand(() -> drivebase.setSpeedMultiplier(1.0)), drivebase.driveFieldOriented(driveAngularVelocity));
+    Command driveRobotOrientedAngularVelocity  = new SequentialCommandGroup(new InstantCommand(() -> drivebase.setSpeedMultiplier(-1.0)), drivebase.driveFieldOriented(driveRobotOriented));
     Command driveSetpointGen = drivebase.driveWithSetpointGeneratorFieldRelative(
         driveDirectAngle);
     Command driveFieldOrientedDirectAngleKeyboard      = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
@@ -202,11 +222,37 @@ public class RobotContainer
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      driverXbox.rightBumper().toggleOnTrue(new SlowDown(drivebase));
 
       logitechController.a()
-        .whileTrue(drivebase.aimAtTarget(cameraEnum));
+        .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
+
+      //brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
+      brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 3, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D));
+      //brodieBox2026.button(3).onTrue()
+
+      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 10, vision, drivebase));
+
+
+      brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
+
+      //Belt Set Speed
+      brodieBox2026.button(4)
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.3)))
+        .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
       
+      //Deploy Speed (Keep Low)
+      brodieBox2026.button(5)
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.5)))
+        .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
+
+      brodieBox2026.button(6).toggleOnTrue(new toggleLauncherMotor(shooter));
+        //.toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)));
+        //.toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
+    
+      brodieBox2026.button(7)
+        .onTrue(new InstantCommand(()-> intake.setDeploySpeed(0.1)))
+        .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
     }
 
   }
@@ -220,8 +266,12 @@ public class RobotContainer
     return vision;
   }
 
-  public Cameras getCameraEnum() {
-    return cameraEnum;
+  public Cameras getCameraCenterEnum() {
+    return cameraCenterEnum;
+  }
+
+  public Cameras getCameraOffsetEnum() {
+    return cameraOffsetEnum;
   }
 
   /**

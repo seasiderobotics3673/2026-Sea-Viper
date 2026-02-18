@@ -69,6 +69,11 @@ public class SwerveSubsystem extends SubsystemBase
    */
   private       Vision      vision;
 
+  private double speedMultiplier = Constants.SWERVE_SPEED_FULL;
+  
+  //true is normal speed, false is slow speed
+  private boolean speedModifierToggle = true;
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -132,6 +137,22 @@ public class SwerveSubsystem extends SubsystemBase
   public void setupPhotonVision()
   {
     vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+  }
+
+  public void setSpeedMultiplier(double speedMultiplier) {
+    this.speedMultiplier = speedMultiplier;
+    System.out.println("Set Speed Multiplier To: " + speedMultiplier);
+  }
+
+  public void toggleSpeedMultiplier() {
+    boolean toggleFlag;
+    if (speedModifierToggle == true) {
+      toggleFlag = false;
+      setSpeedMultiplier(Constants.SWERVE_SPEED_SLOW);
+    } else {
+      toggleFlag = true;
+      setSpeedMultiplier(Constants.SWERVE_SPEED_FULL);
+    }
   }
 
   @Override
@@ -411,9 +432,9 @@ public class SwerveSubsystem extends SubsystemBase
     return run(() -> {
       // Make the robot move
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
-                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * speedMultiplier,
+                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity() * speedMultiplier), 0.8),
+                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity() * speedMultiplier,
                         true,
                         false);
     });
@@ -486,7 +507,7 @@ public class SwerveSubsystem extends SubsystemBase
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity)
   {
     return run(() -> {
-      swerveDrive.driveFieldOriented(velocity.get());
+      swerveDrive.driveFieldOriented(velocity.get().times(speedMultiplier));
     });
   }
 
@@ -597,6 +618,30 @@ public class SwerveSubsystem extends SubsystemBase
   public void setMotorBrake(boolean brake)
   {
     swerveDrive.setMotorIdleMode(brake);
+  }
+
+  /**
+   * 
+   * Scales the given speed.
+   * 
+   * @param translation X or Y of the target, relative to the bot
+   * @param destDistance The destination distance
+   * @param maxSpeed The max speed
+   * @param fullSpeedDist the distance where we want our speed to be our max speed.
+   */
+  public double scaleSpeed(
+    double translation, //X or Y of target, relative to bot
+    double destDistance,
+    double maxSpeed,
+    double fullSpeedDist) 
+  {
+
+    double distanceToTarget;
+    distanceToTarget = (translation < destDistance) ? destDistance - translation : translation - destDistance;
+
+    double scale = Math.min(1.0, distanceToTarget / fullSpeedDist); //Can add a square to the end of this to smooth scaling
+
+    return maxSpeed * scale;
   }
 
   /**
