@@ -167,6 +167,8 @@ public class Robot extends TimedRobot
   public void teleopPeriodic()
   {
     vision.getEstimatedGlobalPose(cameraEnum);
+
+    //TO-DO: change the line above to be using "getAllUnreadResults" from all cameras (after checking the camera is on)
   }
 
   @Override
