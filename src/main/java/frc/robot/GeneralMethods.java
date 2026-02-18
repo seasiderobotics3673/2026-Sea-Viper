@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 /** Add your docs here. */
 public class GeneralMethods {
 
@@ -28,6 +31,12 @@ public class GeneralMethods {
                 return false;
             }
         }
+    }
+
+    //Presumes the secondary Translation2d is from (0,0), aka bot center
+    public Rotation2d calculateAngleToPoint(Translation2d point) {
+        double theta = Math.atan2(point.getY(), point.getX());
+        return Rotation2d.fromRadians(theta);
     }
 
 }
