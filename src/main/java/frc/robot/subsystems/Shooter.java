@@ -5,15 +5,22 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
-  private TalonFX kickerMotor = new TalonFX(25);
+  //private TalonFX kickerMotor = new TalonFX(25);
+  private SparkFlex kickerMotor = new SparkFlex(25, MotorType.kBrushless);
+  private SparkFlexConfig kickerMotorConfig = new SparkFlexConfig();
   private TalonFX launcherMotor = new TalonFX(15);
 
-  public Shooter() {}
+  public Shooter() {
+    //kickerMotor.configure(kickerMotorConfig, null, null)
+  }
 
   @Override
   public void periodic() {
