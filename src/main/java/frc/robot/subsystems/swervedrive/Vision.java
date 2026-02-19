@@ -444,7 +444,7 @@ public class Vision
     return pose;
   }
 
-  public ArrayList<PhotonTrackedTarget> getAllTargetTransforms(Cameras cameraEnum) {
+  public ArrayList<PhotonTrackedTarget> getAllTargets(Cameras cameraEnum) {
     Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
 
     if (result0.isEmpty()) {
@@ -465,8 +465,8 @@ public class Vision
     return targetArray;
   }
 
-  public Transform3d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
-    var targetArray = getAllTargetTransforms(cameraEnum);
+  public Translation3d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
+    var targetArray = getAllTargets(cameraEnum);
     var ambiguityArray = new ArrayList<Double>();
 
     //All Red Alliance HUB IDs
@@ -475,7 +475,7 @@ public class Vision
     var idArrayBlue = new ArrayList<Integer>(Arrays.asList(19,20,18,27,26,25,24,21));
 
     if (targetArray.equals(new ArrayList<PhotonTrackedTarget>())) {
-      return new Transform3d();
+      return new Translation3d();
     }
 
     if (drivebase.isRedAlliance()) {
@@ -492,11 +492,39 @@ public class Vision
       }
     }
 
+    int targetIndex = 0;
+    double lowestTargetAmbiguity = 1;
+
+    //Gets lowest ambiguity target
     for (PhotonTrackedTarget trackedTarget : targetArray) {
-      ambiguityArray.add(trackedTarget.getPoseAmbiguity());
+      //Lower ambiguity values are better.
+      double currentTargetAmbiguity = trackedTarget.getPoseAmbiguity();
+      if (currentTargetAmbiguity < lowestTargetAmbiguity && Double.compare(currentTargetAmbiguity, -1.0) != 0) {
+        lowestTargetAmbiguity = currentTargetAmbiguity;
+        targetIndex = targetArray.indexOf(trackedTarget);
+      }
     }
 
+    var bestTarget = targetArray.get(targetIndex);
+    Transform3d HUBCenterTransform;
 
+    if (drivebase.isRedAlliance()) {
+      
+      switch (bestTarget.getFiducialId()) {
+        case 10:
+          //Center Front Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              //HUB is 47 inches by 47 inches
+                              (new Transform3d(Units.inchesToMeters(23.5), 0.0, 0.0, new Rotation3d()));
+          break;
+
+        case 9:
+          //Offset Front Apriltag
+      
+        default:
+          break;
+      }
+    }
 
   }
 
