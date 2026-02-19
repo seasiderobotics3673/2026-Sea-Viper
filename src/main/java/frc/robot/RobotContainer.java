@@ -231,7 +231,7 @@ public class RobotContainer
       brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 3, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
-      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, true, 10, vision, drivebase));
+      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
 
 
       brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));

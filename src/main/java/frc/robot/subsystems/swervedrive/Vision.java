@@ -28,6 +28,7 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import java.awt.Desktop;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -441,6 +442,62 @@ public class Vision
     Transform3d pose = target.bestCameraToTarget;
 
     return pose;
+  }
+
+  public ArrayList<PhotonTrackedTarget> getAllTargetTransforms(Cameras cameraEnum) {
+    Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
+
+    if (result0.isEmpty()) {
+      DriverStation.reportWarning("Get Target Pose Failed; Is Your Camera On?", false);
+      return new ArrayList<PhotonTrackedTarget>();
+    }
+
+    var result = result0.get();
+
+    if (!result.hasTargets()) {
+      DriverStation.reportWarning("Get Target Pose called with no targets in sight.", false);
+      return new ArrayList<PhotonTrackedTarget>();
+    }
+
+    var targetArray = new ArrayList<PhotonTrackedTarget>(20);
+    targetArray.addAll(result.getTargets());
+
+    return targetArray;
+  }
+
+  public Transform3d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
+    var targetArray = getAllTargetTransforms(cameraEnum);
+    var ambiguityArray = new ArrayList<Double>();
+
+    //All Red Alliance HUB IDs
+    var idArrayRed = new ArrayList<Integer>(Arrays.asList(9,10,8,5,11,2,4,3));
+    //All Blue Alliance HUB IDs
+    var idArrayBlue = new ArrayList<Integer>(Arrays.asList(19,20,18,27,26,25,24,21));
+
+    if (targetArray.equals(new ArrayList<PhotonTrackedTarget>())) {
+      return new Transform3d();
+    }
+
+    if (drivebase.isRedAlliance()) {
+      for (PhotonTrackedTarget trackedTarget : targetArray) {
+        if (!idArrayRed.contains(trackedTarget.getFiducialId())) {
+          targetArray.remove(trackedTarget);
+        }
+      }
+    } else {
+      for (PhotonTrackedTarget trackedTarget : targetArray) {
+        if (!idArrayBlue.contains(trackedTarget.getFiducialId())) {
+          targetArray.remove(trackedTarget);
+        }
+      }
+    }
+
+    for (PhotonTrackedTarget trackedTarget : targetArray) {
+      ambiguityArray.add(trackedTarget.getPoseAmbiguity());
+    }
+
+
+
   }
 
       //Inaccurate at lower target pitches.
