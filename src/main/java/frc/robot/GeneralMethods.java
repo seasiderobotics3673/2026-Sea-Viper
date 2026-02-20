@@ -17,7 +17,7 @@ public class GeneralMethods {
      * @param isBlacklist determines whether the function returns true if comparisonNumber is inside the tolerance (a whitelist) or false (a blacklist)
      * @return
      */
-    public boolean compareToTolerance(Double negativeTolerance, Double positiveTolerance, Double comparisonNumber, boolean isBlacklist) {
+    public static boolean compareToTolerance(Double negativeTolerance, Double positiveTolerance, Double comparisonNumber, boolean isBlacklist) {
         if (isBlacklist) {
             if (comparisonNumber <= negativeTolerance || comparisonNumber >= positiveTolerance) {
                 return true;
@@ -34,7 +34,7 @@ public class GeneralMethods {
     }
 
     //Presumes the secondary Translation2d is from (0,0), aka bot center
-    public Rotation2d calculateAngleToPoint(Translation2d point) {
+    public static Rotation2d calculateAngleToPoint(Translation2d point) {
         double theta = Math.atan2(point.getY(), point.getX());
         return Rotation2d.fromRadians(theta);
     }

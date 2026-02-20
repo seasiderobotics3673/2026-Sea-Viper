@@ -15,19 +15,15 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 public class rotateToHeading extends Command {
 
   private SwerveSubsystem drivebase;
-  private GeneralMethods utils;
 
   private Rotation2d destinationHeading;
   private Rotation2d currentHeading;
 
   private Rotation2d deltaHeading;
 
-  private Rotation2d rotationTolerance;
   private double speedTolerance;
 
   private double rotationSpeed;
-
-  private int counter;
 
   private boolean isFinishedFlag;
 
@@ -44,11 +40,6 @@ public class rotateToHeading extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    utils = new GeneralMethods();
-
-    new Rotation2d();
-    rotationTolerance = Rotation2d.fromDegrees(0.25);
-
     speedTolerance = 0.15;
 
     isFinishedFlag = false;
@@ -63,9 +54,8 @@ public class rotateToHeading extends Command {
     currentHeading = drivebase.getHeading();
 
     deltaHeading = destinationHeading.minus(currentHeading);
-    counter++;
 
-    if (utils.compareToTolerance(
+    if (GeneralMethods.compareToTolerance(
       //(destinationHeading.getDegrees() - rotationTolerance.getDegrees()), 
       (-speedTolerance),
       (speedTolerance), 
@@ -80,11 +70,6 @@ public class rotateToHeading extends Command {
         }
     } else {
       rotationSpeed = 0.0;
-    }
-
-    if (counter >= 10) {
-      System.out.println("Rotation Speed: " + rotationSpeed);
-      counter = 0;
     }
 
     drivebase.drive(new ChassisSpeeds(0,0,rotationSpeed));

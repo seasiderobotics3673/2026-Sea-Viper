@@ -337,47 +337,6 @@ public class Vision
   }
 
 
-/*
- * 
- * Gets the X and Y position of the Apriltag with the least ambiguity. Default unit is meters.
- * SpecificID boolean should be set to true if you want a specific ID of Apriltag
- * 
- */
-  public Translation2d getTargetPos(Cameras camera, boolean isSpecificID, int fiducialId) {
-    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
-
-    if (result0.isEmpty()) {
-      DriverStation.reportWarning("Get Target Position Failed; Is Your Camera On?", false);
-      return new Translation2d();
-    }
-
-    var result = result0.get();
-
-    if (!result.hasTargets()) {
-      DriverStation.reportWarning("Get Target Position called with no targets in sight.", false);
-      return new Translation2d();
-    }
-
-    double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
-    double cameraPitch = camera.robotToCamTransform.getRotation().getY(); //Should Return 0
-    double targetHeight = Constants.APRILTAG_HEIGHTS[result.getBestTarget().getFiducialId() - 1];
-    if (isSpecificID) {
-      targetHeight = Constants.APRILTAG_HEIGHTS[fiducialId - 1];
-    }
-    double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
-    (
-      Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
-      targetHeight, 
-      cameraPitch,
-      estimatedTargetPitch
-    );
-    
-    Rotation2d estimatedYaw = Rotation2d.fromDegrees(-result.getBestTarget().getYaw());
-
-    return PhotonUtils.estimateCameraToTargetTranslation(estimatedTargetDistance, estimatedYaw);
-  }
-
-
     //Inaccurate at lower target pitches.
   public double getDistanceToTarget(Cameras camera) {
     Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
@@ -468,9 +427,10 @@ public class Vision
     return targetArray;
   }
 
+
+
   public Translation3d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
     var targetArray = getAllTargets(cameraEnum);
-    var ambiguityArray = new ArrayList<Double>();
 
     //All Red Alliance HUB IDs
     var idArrayRed = new ArrayList<Integer>(Arrays.asList(9,10,8,5,11,2,4,3));
@@ -607,29 +567,6 @@ public class Vision
 
     return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
 
-  }
-
-      //Inaccurate at lower target pitches.
-  public double getDistanceToTargetID(Cameras camera, int fiducialId) {
-    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
-    if (result0.isPresent()) {
-      var result = result0.get();
-
-      if (result.hasTargets()) {
-        double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
-        double targetHeight = Constants.APRILTAG_HEIGHTS[fiducialId - 1]; //Dummy Value; Change Later
-        double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
-        (
-          Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
-          targetHeight, 
-          0.0,
-          estimatedTargetPitch
-        );
-
-        return estimatedTargetDistance;
-      }
-    }
-    return -1.0;
   }
 
   public Transform3d getTargetTransformOffset(Cameras camera, Translation3d offsetPoint, boolean isSpecificID, int fiducialId) {

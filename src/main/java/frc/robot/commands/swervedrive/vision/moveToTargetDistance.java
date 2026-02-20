@@ -143,7 +143,7 @@ public class moveToTargetDistance extends Command {
 
     currentHeading = drivebase.getHeading();
 
-    if (generalMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTransform3d.getX(), true)) {
+    if (GeneralMethods.compareToTolerance((destDistance - xTolerance), (destDistance + xTolerance), apriltagTransform3d.getX(), true)) {
 
       if (apriltagTransform3d.getX() >= 0) {
         //driveSpeedX = Constants.MAX_SPEED/4 * directionInverse;
@@ -157,7 +157,7 @@ public class moveToTargetDistance extends Command {
       driveSpeedX = 0.0;
     }
 
-    if (generalMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTransform3d.getY(), true)) {
+    if (GeneralMethods.compareToTolerance(-yTolerance, yTolerance, apriltagTransform3d.getY(), true)) {
 
       if (apriltagTransform3d.getY() >= 0) {
         //driveSpeedY = Constants.MAX_SPEED*0.2;
@@ -171,7 +171,7 @@ public class moveToTargetDistance extends Command {
       driveSpeedY = 0.0;
     }
 
-    if (generalMethods.compareToTolerance(
+    if (GeneralMethods.compareToTolerance(
       (desiredHeading - rotationTolerance), 
       (desiredHeading + rotationTolerance), 
       currentHeading.getDegrees(), 
