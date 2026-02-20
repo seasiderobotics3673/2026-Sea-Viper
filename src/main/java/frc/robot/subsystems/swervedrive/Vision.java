@@ -20,12 +20,15 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
+
 import java.awt.Desktop;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -506,7 +509,53 @@ public class Vision
     }
 
     var bestTarget = targetArray.get(targetIndex);
-    Transform3d HUBCenterTransform;
+    Transform3d HUBCenterTransform = new Transform3d();
+
+    if (!drivebase.isRedAlliance()) {
+
+      switch (bestTarget.getFiducialId()) {
+        case 25:
+          //Center Front Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(23.5),0.0,0.0, new Rotation3d()));
+          break;
+        case 26:
+          //Offset Front Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(23.5),Units.inchesToMeters(14), 0.0, new Rotation3d()));
+          break;
+        case 27:
+          //Center Right Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(0.0, Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
+          break;
+        case 18: 
+          //Offset Right Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(-14), Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
+          break;
+        case 19:
+          //Center Back Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(-23.5), 0.0, 0.0, new Rotation3d()));
+          break;
+        case 20:
+          //Offset Back Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(-23.5), Units.inchesToMeters(-14), 0.0, new Rotation3d()));
+          break;
+        case 21:
+          //Center Left Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(0.0, Units.inchesToMeters(-23.5), 0.0, new Rotation3d()));
+          break;
+        case 24:
+          //Offset Left Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(14), Units.inchesToMeters(-23.5), 0.0, new Rotation3d()));
+          break;
+      }
+    }
 
     if (drivebase.isRedAlliance()) {
       
@@ -517,14 +566,46 @@ public class Vision
                               //HUB is 47 inches by 47 inches
                               (new Transform3d(Units.inchesToMeters(23.5), 0.0, 0.0, new Rotation3d()));
           break;
-
         case 9:
           //Offset Front Apriltag
-      
-        default:
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              //wpilib suite has Y offsets.
+                              (new Transform3d(Units.inchesToMeters(23.5), Units.inchesToMeters(14), 0.0, new Rotation3d()));
+          break;
+        case 2:
+          //Center Right Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              (new Transform3d(0.0, Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
+          break;
+        case 11:
+          //Offset Right Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              (new Transform3d(Units.inchesToMeters(-14), Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
+          break;
+        case 4:
+          //Center Back Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              (new Transform3d(Units.inchesToMeters(-23.5), 0.0, 0.0, new Rotation3d()));
+          break;
+        case 3:
+          //Offset Back Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+                              (new Transform3d(Units.inchesToMeters(-23.5), Units.inchesToMeters(-14), 0.0, new Rotation3d()));
+          break;
+        case 8:
+          //Center Left Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(0.0, Units.inchesToMeters(-23.5),0.0, new Rotation3d()));
+          break;
+        case 5:
+          //Offset Left Apriltag
+          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
+          (new Transform3d(Units.inchesToMeters(14), Units.inchesToMeters(-23.5),0.0, new Rotation3d()));
           break;
       }
     }
+
+    return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
 
   }
 
