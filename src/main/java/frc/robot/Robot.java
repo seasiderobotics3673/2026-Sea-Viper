@@ -69,7 +69,9 @@ public class Robot extends TimedRobot
       DriverStation.silenceJoystickConnectionWarning(true);
     }
 
-    drivebase.zeroGyro();
+    //drivebase.zeroGyro();
+
+    drivebase.zeroGyroWithAlliance();
 
   }
 
