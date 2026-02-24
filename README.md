@@ -1,6 +1,6 @@
 # 2026 Sea Viper — FRC Team 3673
 
-Robot code for the 2026 bot. Written in Java using WPILib and YAGSL for swerve drive.
+Robot code for the 2026 bot. Written in Java using WPILib, YAGSL for swerve drive, and PhotonVision for vision processing.
 
 ---
 
@@ -60,6 +60,7 @@ deploy/swerve/
 - [YAGSL Wiki](https://github.com/BroncBotz3481/YAGSL/wiki)
 - [WPILib Docs](https://docs.wpilib.org)
 - [PathPlanner](https://pathplanner.dev)
+- [Vision Processing](https://docs.photonvision.org/en/v2026.2.2/)
 
 ---
 
