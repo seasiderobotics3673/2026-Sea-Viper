@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
+import frc.robot.GeneralMethods;
 import frc.robot.Robot;
 import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
 
@@ -498,16 +499,22 @@ public class Vision
       double ch = Math.cos(fbc.getRadians()) * bc;
       double bh = Math.sin(fbc.getRadians()) * bc;
       //double bi = bh + tagOffset.getY();
+     /* 
       double bi = 0;
       if (bh >= 0) {
         bi = bh + tagOffset.getY();
       } else {
         bi = bh - tagOffset.getY();
       }
+    */
+      double bi = bh - tagOffset.getY();
       double ei = ch + tagOffset.getX();
+
+      Rotation2d headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+
       //Rotation2d headingToHUBCenter = PhotonUtils.getYawToPose(new Pose2d(), new Pose2d(new Translation2d(bi, ei), new Rotation2d()));
       double robotToCenterDistance = Math.sqrt((Math.pow(bi, 2) + Math.pow(ei, 2)));
-      Rotation2d headingToHUBCenter = Rotation2d.fromRadians(Math.atan(bi / ei) * signFlip);
+      //Rotation2d headingToHUBCenter = Rotation2d.fromRadians(Math.atan(bi / ei) * signFlip);
 
       System.out.print(" bc: " + bc);
       System.out.print(" fbc: " + fbc);
