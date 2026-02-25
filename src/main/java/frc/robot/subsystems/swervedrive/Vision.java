@@ -493,11 +493,13 @@ public class Vision
         signFlip = 1;
       }
 
+      Rotation2d abf = drivebase.getHeading();
+
       double bc = Math.sqrt((Math.pow(targetTransform.getX(), 2) + Math.pow(targetTransform.getY(), 2)));
       Rotation2d fbc = Rotation2d.fromRadians(Math.asin(targetTransform.getY() / bc));
-      //System.out.print(" Skew: " + bestTarget.getSkew());
-      double ch = Math.cos(fbc.getRadians()) * bc;
-      double bh = Math.sin(fbc.getRadians()) * bc;
+      Rotation2d abc = abf.plus(fbc);
+      double ch = Math.cos(abc.getRadians()) * bc;
+      double bh = Math.sin(abc.getRadians()) * bc;
       //double bi = bh + tagOffset.getY();
      /* 
       double bi = 0;
@@ -516,8 +518,10 @@ public class Vision
       double robotToCenterDistance = Math.sqrt((Math.pow(bi, 2) + Math.pow(ei, 2)));
       //Rotation2d headingToHUBCenter = Rotation2d.fromRadians(Math.atan(bi / ei) * signFlip);
 
+      System.out.print(" heading: " + abf);
       System.out.print(" bc: " + bc);
       System.out.print(" fbc: " + fbc);
+      System.out.print(" abc: " + abc);
       System.out.print(" ch: " + ch);
       System.out.println(" bh: " + bh);
       System.out.print(" bi: " + bi);

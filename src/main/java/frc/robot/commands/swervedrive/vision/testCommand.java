@@ -38,6 +38,7 @@ public class testCommand extends InstantCommand {
   @Override
   public void initialize() {
     vision.getHUBCenterPoint(cameraEnum, drivebase);
+    System.out.println(drivebase.getHeading());
     //System.out.println("getAllTargets: " + vision.getAllTargets(cameraEnum));
     //System.out.println("getTagPoint: " + vision.getTargetTransform(cameraEnum, false, 0));
     //System.out.println("getHUBCenterPoint: " + vision.getHUBCenterPoint(cameraEnum, drivebase));
