@@ -435,10 +435,16 @@ public class Vision
 
     //All Red Alliance HUB IDs
     var idArrayRed = new ArrayList<Integer>(Arrays.asList(9,10,8,5,11,2,4,3));
+
     //All Blue Alliance HUB IDs
     var idArrayBlue = new ArrayList<Integer>(Arrays.asList(19,20,18,27,26,25,24,21));
+
     var offsetTagArray = new ArrayList<Integer>(Arrays.asList(26, 18, 20, 24, 9, 11, 3, 5));
     var centerTagArray = new ArrayList<Integer>(Arrays.asList(25, 27, 19, 21, 10, 2, 4, 8));
+
+    var idArrayFront = new ArrayList<Integer>(Arrays.asList(9,10,25,26));
+    var idArrayRight = new ArrayList<Integer>(Arrays.asList(11,2,18,27));
+    var idArrayLeft = new ArrayList<Integer>(Arrays.asList(8,5,21,24));
 
     if (targetArray.isEmpty()) {
       //return new Translation3d();
@@ -466,6 +472,9 @@ public class Vision
       }
     }
 
+
+    //When on right side, reverse all tagOffsets, and sin and cos are opposite. 
+
     if (targetArrayFlag == false) {
       DriverStation.reportWarning("No Correct Targets Found", false);
       //return new Translation3d();
@@ -473,6 +482,9 @@ public class Vision
       var bestTarget = targetArray.get(targetIndex);
       Transform3d HUBCenterTransform = new Transform3d();
       Transform3d targetTransform = bestTarget.getBestCameraToTarget();
+
+      //-1 is left side, 0 is center, 1 is right side.
+      int currentSide;
 
       Translation2d tagOffset = new Translation2d();
 
@@ -483,6 +495,17 @@ public class Vision
         if (centerTagArray.contains(bestTarget.getFiducialId())) {
           tagOffset = new Translation2d(Units.inchesToMeters(23.5), 0);
         }
+      }
+
+      if (idArrayLeft.contains(bestTarget.getFiducialId())) {
+        currentSide = -1;
+      } else if (idArrayFront.contains(bestTarget.getFiducialId())) {
+        currentSide = 0;
+      } else if (idArrayRight.contains(bestTarget.getFiducialId())) {
+        currentSide = 1;
+      } else {
+        DriverStation.reportWarning("ID Found was not front, left, or right. This should never happen.", false);
+        currentSide = 0;
       }
 
       double targetYaw = bestTarget.getYaw();
@@ -498,21 +521,41 @@ public class Vision
       double bc = Math.sqrt((Math.pow(targetTransform.getX(), 2) + Math.pow(targetTransform.getY(), 2)));
       Rotation2d fbc = Rotation2d.fromRadians(Math.asin(targetTransform.getY() / bc));
       Rotation2d abc = abf.plus(fbc);
-      double ch = Math.cos(abc.getRadians()) * bc;
-      double bh = Math.sin(abc.getRadians()) * bc;
-      //double bi = bh + tagOffset.getY();
-     /* 
-      double bi = 0;
-      if (bh >= 0) {
-        bi = bh + tagOffset.getY();
-      } else {
-        bi = bh - tagOffset.getY();
-      }
-    */
-      double bi = bh - tagOffset.getY();
-      double ei = ch + tagOffset.getX();
 
-      Rotation2d headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+      double ch = 0;
+      double bh = 0;
+      double ei = 0;
+      double bi = 0;
+
+      Rotation2d headingToHUBCenter = new Rotation2d();
+
+      if (currentSide == 0) {
+        ch = Math.cos(abc.getRadians()) * bc;
+        bh = Math.sin(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+      }
+
+      if (currentSide == 1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh + tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+      }
+
+      if (currentSide == -1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch - tagOffset.getX();
+        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+      }
+
+
+
+      //Rotation2d headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
 
       //Rotation2d headingToHUBCenter = PhotonUtils.getYawToPose(new Pose2d(), new Pose2d(new Translation2d(bi, ei), new Rotation2d()));
       double robotToCenterDistance = Math.sqrt((Math.pow(bi, 2) + Math.pow(ei, 2)));
@@ -526,7 +569,7 @@ public class Vision
       System.out.println(" bh: " + bh);
       System.out.print(" bi: " + bi);
       System.out.print(" ei: " + ei);
-      //System.out.println("robotToCenterDistance: " + robotToCenterDistance);
+      System.out.println("robotToCenterDistance: " + robotToCenterDistance);
       System.out.println("headingToHUBCenter: " + headingToHUBCenter);
       //return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
       }

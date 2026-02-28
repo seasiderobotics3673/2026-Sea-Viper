@@ -57,7 +57,7 @@ public class RobotContainer
   final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/DonDon"));
+                                                                                "swerve/SeaViper"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
@@ -229,7 +229,7 @@ public class RobotContainer
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
       //brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
-      brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 3, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D));
+      //brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 2, vision, 11, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
       brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
@@ -239,8 +239,15 @@ public class RobotContainer
 
       //Belt Set Speed
       brodieBox2026.button(4)
-        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.3)))
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(-0.7)))
         .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
+
+      //Reverse Belt; Set Speed
+      /*
+      brodieBox2026.button(1)
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.7)))
+        .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
+      */
       
       //Deploy Speed (Keep Low)
       brodieBox2026.button(5)

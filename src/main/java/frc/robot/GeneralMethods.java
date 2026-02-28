@@ -33,7 +33,7 @@ public class GeneralMethods {
         }
     }
 
-    //Presumes the secondary Translation2d is from (0,0), aka bot center
+    
     public static Rotation2d calculateAngleToPoint(Translation2d point, int signFlip) {
         double theta = Math.atan2(point.getY(), point.getX());
         return Rotation2d.fromRadians(theta);
