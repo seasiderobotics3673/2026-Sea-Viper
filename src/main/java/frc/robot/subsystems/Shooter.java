@@ -27,13 +27,18 @@ public class Shooter extends SubsystemBase {
   
   /** Creates a new Shooter. */
   //private TalonFX kickerMotor = new TalonFX(25);
-  private SparkFlex kickerMotor = new SparkFlex(25, MotorType.kBrushless);
-  private SparkFlexConfig kickerMotorConfig = new SparkFlexConfig();
+  private SparkFlex kickerMotorSecondary = new SparkFlex(35, MotorType.kBrushless);
+  private SparkFlex kickerMotorPrimary = new SparkFlex(25, MotorType.kBrushless);
+  private SparkFlexConfig kickerMotorPrimaryConfig = new SparkFlexConfig();
+  private SparkFlexConfig kickerMotorSecondaryConfig = new SparkFlexConfig();
   private TalonFX launcherMotor = new TalonFX(15);
 
   public Shooter() {
-    kickerMotorConfig.idleMode(IdleMode.kBrake);
-    kickerMotor.configure(kickerMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    kickerMotorPrimaryConfig.idleMode(IdleMode.kBrake);
+    kickerMotorPrimary.configure(kickerMotorPrimaryConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    kickerMotorSecondaryConfig.idleMode(IdleMode.kBrake);
+    kickerMotorSecondaryConfig.follow(25, true);
+    kickerMotorSecondary.configure(kickerMotorSecondaryConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
   }
 
   @Override
@@ -41,14 +46,14 @@ public class Shooter extends SubsystemBase {
     // This method will be called once per scheduler run
 
     launcherTemperature = launcherMotor.getDeviceTemp();
-    kickerTemperature = kickerMotor.getMotorTemperature();
+    kickerTemperature = kickerMotorPrimary.getMotorTemperature();
     SmartDashboard.putNumber("Launcher Temperature: ", Units.Fahrenheit.convertFrom(launcherTemperature.getValueAsDouble(), Celsius));
     SmartDashboard.putNumber("Kicker Temperature: ", Units.Fahrenheit.convertFrom(kickerTemperature, Celsius));
     SmartDashboard.updateValues();
   }
 
   public void setKickerMotorSpeed(double speed){
-    kickerMotor.set(speed);
+    kickerMotorPrimary.set(speed);
   } 
 
   public void setLauncherMotorSpeed(double speed){
