@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.GeneralMethods;
+import frc.robot.subsystems.swervedrive.Vision.Cameras;
+import swervelib.SwerveInputStream;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class altDriveCommand extends Command {
@@ -18,6 +20,15 @@ public class altDriveCommand extends Command {
   //actualy, make the stuffs you know like dis
   SwerveSubsystem driveBase;
   Vision vision;
+
+  Cameras camera;
+
+  SwerveInputStream controllerInput;
+
+  double velocityX;
+  double velocityY;
+
+  int counter;
 
   Translation2d point;
 
@@ -33,58 +44,54 @@ public class altDriveCommand extends Command {
   boolean isFinishedFlag;
 
 
-  public altDriveCommand(SwerveSubsystem driveBase, Vision vision) {
+  public altDriveCommand(SwerveSubsystem driveBase, Vision vision, Cameras camera, SwerveInputStream controllerInput) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(driveBase);
     this.driveBase = driveBase;
     this.vision = vision;
+    this.camera = camera;
+    this.controllerInput = controllerInput;
+    addRequirements(driveBase);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    destinationHeading = getHUBcenterPoint()
-
     speedTolerance = 0.15;
 
     isFinishedFlag = false;
 
     rotationSpeed = speedTolerance + 0.02;
+
+    counter = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
    @Override
   public void execute() {
+    counter++;
+
     currentHeading = driveBase.getHeading();
+    if (counter > 20) {
+      System.out.println("Angle to HUB: " + vision.getAngleToHUB(camera, driveBase));
+    } 
+    destinationHeading = vision.getAngleToHUB(camera, driveBase);
     deltaHeading = destinationHeading.minus(currentHeading);
 
-    if (GeneralMethods.compareToTolerance(
-      (-speedTolerance),
-      (speedTolerance), 
-      rotationSpeed, 
-      true)) {
-        if (deltaHeading.getDegrees() > 0.0) {
-          //rotationSpeed = 0.5;
-          rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), Constants.MAX_ANGULAR_SPEED*0.8, 15);
-        } else {
-          //rotationSpeed = -0.5;
-          rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), -Constants.MAX_ANGULAR_SPEED*0.8, 15);
-        }
+    if (!destinationHeading.equals(new Rotation2d())) {
+      if (deltaHeading.getDegrees() > 0.0) {
+        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), Constants.MAX_ANGULAR_SPEED*0.8, 15);
+      } else {
+        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), -Constants.MAX_ANGULAR_SPEED*0.8, 15);
+      }
     } else {
       rotationSpeed = 0.0;
     }
-    /*
-    get information from the controller
-    use that information in the driveBase.drive
-    stop geting the rotationSpeed from the controller, get it from getHUBcenterPoint() -ollys working on that- instead 
-    flip the rotation acording to the direction that the hub center is
-    */
 
-    driveBase.drive(new ChassisSpeeds(0,0,rotationSpeed));
 
-    if (rotationSpeed == 0.0) {
-      isFinishedFlag = true;
-    }
+    velocityX = controllerInput.get().vxMetersPerSecond;
+    velocityY = controllerInput.get().vyMetersPerSecond;
+
+    driveBase.drive(new ChassisSpeeds(velocityX, velocityY, rotationSpeed));
   }
   
 

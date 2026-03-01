@@ -469,7 +469,6 @@ public class Vision
       if (currentTargetAmbiguity < lowestTargetAmbiguity && Double.compare(currentTargetAmbiguity, -1.0) != 0) {
         lowestTargetAmbiguity = currentTargetAmbiguity;
         targetIndex = targetArray.indexOf(trackedTarget);
-        System.out.println("targetIndex was Set");
       }
     }
 
@@ -510,12 +509,15 @@ public class Vision
       }
 
       double targetYaw = bestTarget.getYaw();
+      //WARN: This was unknowingly not doing anything in working test. If any errors occur, implement this.
+      /*
       int signFlip = 0;
       if (targetYaw >= 0) {
         signFlip = -1;
       } else {
         signFlip = 1;
       }
+      */
 
       Rotation2d abf = drivebase.getHeading();
 
@@ -535,7 +537,7 @@ public class Vision
         bh = Math.sin(abc.getRadians()) * bc;
         bi = bh - tagOffset.getY();
         ei = ch + tagOffset.getX();
-        return GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi));
       }
 
       if (currentSide == 1) {
@@ -543,7 +545,7 @@ public class Vision
         bh = Math.cos(abc.getRadians()) * bc;
         bi = bh + tagOffset.getY();
         ei = ch + tagOffset.getX();
-        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
       }
 
       if (currentSide == -1) {
@@ -551,7 +553,7 @@ public class Vision
         bh = Math.cos(abc.getRadians()) * bc;
         bi = bh - tagOffset.getY();
         ei = ch - tagOffset.getX();
-        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
       }
 
       return new Rotation2d();
