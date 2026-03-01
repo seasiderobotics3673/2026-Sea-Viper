@@ -481,7 +481,7 @@ public class Vision
     } else {
       var bestTarget = targetArray.get(targetIndex);
       Transform3d HUBCenterTransform = new Transform3d();
-      Transform3d targetTransform = bestTarget.getBestCameraToTarget();
+      Translation3d targetTransform = shiftTargetTransform(new Translation3d(), bestTarget);
 
       //-1 is left side, 0 is center, 1 is right side.
       int currentSide;
@@ -507,17 +507,6 @@ public class Vision
         DriverStation.reportError("ID Found was not front, left, or right. This should never happen.", false);
         return new Rotation2d();
       }
-
-      double targetYaw = bestTarget.getYaw();
-      //WARN: This was unknowingly not doing anything in working test. If any errors occur, implement this.
-      /*
-      int signFlip = 0;
-      if (targetYaw >= 0) {
-        signFlip = -1;
-      } else {
-        signFlip = 1;
-      }
-      */
 
       Rotation2d abf = drivebase.getHeading();
 
@@ -605,6 +594,24 @@ public class Vision
 
     //return new Transform3d(originRelativeTargetX, originRelativeTargetY, originRelativeTargetZ, camRotation);
     return new Transform3d(offsetRelativeTargetX, offsetRelativeTargetY, offsetRelativeTargetZ, camRotation);
+  }
+
+  public Translation3d shiftTargetTransform(Translation3d offsetPoint, PhotonTrackedTarget target) {
+    Translation3d camRelativeTranslation3d = target.getBestCameraToTarget().getTranslation();
+
+    double camRelativeTargetX = camRelativeTranslation3d.getX();
+    double camRelativeTargetY = camRelativeTranslation3d.getY();
+    double camRelativeTargetZ = camRelativeTranslation3d.getZ();
+
+    double originRelativeTargetX = camRelativeTargetX + Cameras.OFFSET_CAM.robotToCamTransform.getX();
+    double originRelativeTargetY = camRelativeTargetY - Cameras.OFFSET_CAM.robotToCamTransform.getY();
+    double originRelativeTargetZ = camRelativeTargetZ + Cameras.OFFSET_CAM.robotToCamTransform.getZ();
+
+    double shiftedTargetX = originRelativeTargetX - offsetPoint.getX();
+    double shiftedTargetY = originRelativeTargetY + offsetPoint.getY();
+    double shiftedTargetZ = originRelativeTargetZ + offsetPoint.getZ();
+
+    return new Translation3d(shiftedTargetX, shiftedTargetY, shiftedTargetZ);
   }
 
   //Should provide the actual camera name, not the name property of the camera-- OFFSET_CAMERA instead of offsetCamera

@@ -71,17 +71,18 @@ public class altDriveCommand extends Command {
     counter++;
 
     currentHeading = driveBase.getHeading();
-    if (counter > 20) {
+    if (counter > 50) {
       System.out.println("Angle to HUB: " + vision.getAngleToHUB(camera, driveBase));
+      System.out.println("Current Heading: " + driveBase.getHeading());
     } 
     destinationHeading = vision.getAngleToHUB(camera, driveBase);
     deltaHeading = destinationHeading.minus(currentHeading);
 
     if (!destinationHeading.equals(new Rotation2d())) {
       if (deltaHeading.getDegrees() > 0.0) {
-        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), Constants.MAX_ANGULAR_SPEED*0.8, 15);
+        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), Constants.MAX_ANGULAR_SPEED*0.8, 7.5);
       } else {
-        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), -Constants.MAX_ANGULAR_SPEED*0.8, 15);
+        rotationSpeed = driveBase.scaleSpeed(currentHeading.getDegrees(), destinationHeading.getDegrees(), -Constants.MAX_ANGULAR_SPEED*0.8, 7.5);
       }
     } else {
       rotationSpeed = 0.0;

@@ -641,7 +641,7 @@ public class SwerveSubsystem extends SubsystemBase
     distanceToTarget = (translation < destDistance) ? destDistance - translation : translation - destDistance;
 
     double scale = Math.min(1.0, Math.pow(distanceToTarget / fullSpeedDist, 2)); //Can add a square to the end of this to smooth scaling
-    if (scale < 0.02) {
+    if (scale < 0.01) {
       scale = 0;
     } else {
       System.out.println("Scale: " + scale);
