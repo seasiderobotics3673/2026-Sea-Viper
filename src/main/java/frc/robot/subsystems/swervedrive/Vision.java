@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Microseconds;
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -430,7 +431,7 @@ public class Vision
 
 
 
-  public void getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
+  public Rotation2d getAngleToHUB(Cameras cameraEnum, SwerveSubsystem drivebase) {
     ArrayList<PhotonTrackedTarget> targetArray = getAllTargets(cameraEnum);
 
     //All Red Alliance HUB IDs
@@ -477,7 +478,7 @@ public class Vision
 
     if (targetArrayFlag == false) {
       DriverStation.reportWarning("No Correct Targets Found", false);
-      //return new Translation3d();
+      return new Rotation2d();
     } else {
       var bestTarget = targetArray.get(targetIndex);
       Transform3d HUBCenterTransform = new Transform3d();
@@ -504,8 +505,8 @@ public class Vision
       } else if (idArrayRight.contains(bestTarget.getFiducialId())) {
         currentSide = 1;
       } else {
-        DriverStation.reportWarning("ID Found was not front, left, or right. This should never happen.", false);
-        currentSide = 0;
+        DriverStation.reportError("ID Found was not front, left, or right. This should never happen.", false);
+        return new Rotation2d();
       }
 
       double targetYaw = bestTarget.getYaw();
@@ -534,7 +535,7 @@ public class Vision
         bh = Math.sin(abc.getRadians()) * bc;
         bi = bh - tagOffset.getY();
         ei = ch + tagOffset.getX();
-        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
       }
 
       if (currentSide == 1) {
@@ -542,7 +543,7 @@ public class Vision
         bh = Math.cos(abc.getRadians()) * bc;
         bi = bh + tagOffset.getY();
         ei = ch + tagOffset.getX();
-        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
       }
 
       if (currentSide == -1) {
@@ -550,10 +551,12 @@ public class Vision
         bh = Math.cos(abc.getRadians()) * bc;
         bi = bh - tagOffset.getY();
         ei = ch - tagOffset.getX();
-        headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei), signFlip);
       }
 
+      return new Rotation2d();
 
+      /*
 
       //Rotation2d headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
 
@@ -572,6 +575,8 @@ public class Vision
       System.out.println("robotToCenterDistance: " + robotToCenterDistance);
       System.out.println("headingToHUBCenter: " + headingToHUBCenter);
       //return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
+
+      */
       }
   }
 
