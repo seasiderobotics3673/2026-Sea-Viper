@@ -20,12 +20,14 @@ public class toggleLauncherMotor extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.setLauncherMotorSpeed((-0.75)*0.85);
+    shooter.setLauncherMotorSpeed((-0.75));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    
+  }
 
   // Called once the command ends or is interrupted.
   @Override

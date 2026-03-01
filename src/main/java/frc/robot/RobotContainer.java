@@ -57,7 +57,7 @@ public class RobotContainer
   final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/SeaViper"));
+                                                                                "swerve/DonDon"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
@@ -217,7 +217,8 @@ public class RobotContainer
       driverXbox.rightBumper().onTrue(Commands.none());
     } else
     {
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
+      //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
+      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
@@ -228,7 +229,7 @@ public class RobotContainer
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 
       //brodieBox2026.button(3).onTrue(new moveToTargetDistance(3, drivebase, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D, new Translation3d(0, 0, 0), 0));
-      brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 3, vision, 10, Constants.FRONT_EDGE_TRANSLATION3D));
+      //brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 2, vision, 11, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
       brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
@@ -236,20 +237,27 @@ public class RobotContainer
 
       brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
 
-      //Belt Set Speed
+      //Kicker Motor Set Speed
       brodieBox2026.button(4)
-        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.3)))
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(-1.0)))
+        .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
+
+      //Reverse Kicker
+      brodieBox2026.button(1)
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.7)))
         .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
       
-      //Deploy Speed (Keep Low)
+      //Set Intake Speed - Intake Button
       brodieBox2026.button(5)
-        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.5)))
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.75)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
 
+      //Launcher Motor Speed - Bottom Left Button
       brodieBox2026.button(6).toggleOnTrue(new toggleLauncherMotor(shooter));
         //.toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)));
         //.toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
     
+      //Deploy Speed (Keep Low) - Top Left Button
       brodieBox2026.button(7)
         .onTrue(new InstantCommand(()-> intake.setDeploySpeed(-1)))
         .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
