@@ -57,7 +57,7 @@ public class RobotContainer
   final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/SeaViper"));
+                                                                                "swerve/DonDon"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
@@ -237,27 +237,27 @@ public class RobotContainer
 
       brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
 
-      //Belt Set Speed
+      //Kicker Motor Set Speed
       brodieBox2026.button(4)
-        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(-0.7)))
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(-1.0)))
         .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
 
-      //Reverse Belt; Set Speed
-      /*
+      //Reverse Kicker
       brodieBox2026.button(1)
         .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.7)))
         .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
-      */
       
-      //Deploy Speed (Keep Low)
+      //Set Intake Speed - Intake Button
       brodieBox2026.button(5)
-        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.5)))
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.75)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
 
+      //Launcher Motor Speed - Bottom Left Button
       brodieBox2026.button(6).toggleOnTrue(new toggleLauncherMotor(shooter));
         //.toggleOnTrue(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.75)));
         //.toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
     
+      //Deploy Speed (Keep Low) - Top Left Button
       brodieBox2026.button(7)
         .onTrue(new InstantCommand(()-> intake.setDeploySpeed(-1)))
         .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
