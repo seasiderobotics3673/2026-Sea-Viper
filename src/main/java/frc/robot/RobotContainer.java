@@ -36,6 +36,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.subsystems.swervedrive.Vision;
+import frc.robot.subsystems.swervedrive.altDriveCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public class RobotContainer
   final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/DonDon"));
+                                                                                "swerve/SeaViper"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
@@ -222,9 +223,10 @@ public class RobotContainer
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
-      driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      //Field Oriented
+      driverXbox.leftBumper().toggleOnTrue(new altDriveCommand(drivebase, vision, cameraOffsetEnum, driveAngularVelocity));
       driverXbox.rightBumper().toggleOnTrue(new SlowDown(drivebase));
-
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
 

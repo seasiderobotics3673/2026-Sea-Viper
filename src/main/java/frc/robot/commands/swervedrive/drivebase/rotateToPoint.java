@@ -41,7 +41,7 @@ public class rotateToPoint extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    destinationHeading = GeneralMethods.calculateAngleToPoint(point, 1);
+    destinationHeading = GeneralMethods.calculateAngleToPoint(point);
 
     speedTolerance = 0.15;
 

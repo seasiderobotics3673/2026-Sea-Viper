@@ -34,7 +34,7 @@ public class GeneralMethods {
     }
 
     
-    public static Rotation2d calculateAngleToPoint(Translation2d point, int signFlip) {
+    public static Rotation2d calculateAngleToPoint(Translation2d point) {
         double theta = Math.atan2(point.getY(), point.getX());
         return Rotation2d.fromRadians(theta);
     }
