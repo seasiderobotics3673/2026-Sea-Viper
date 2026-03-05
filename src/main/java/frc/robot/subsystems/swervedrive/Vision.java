@@ -603,8 +603,8 @@ public class Vision
     double camRelativeTargetY = camRelativeTranslation3d.getY();
     double camRelativeTargetZ = camRelativeTranslation3d.getZ();
 
-    double originRelativeTargetX = camRelativeTargetX + Cameras.OFFSET_CAM.robotToCamTransform.getX();
-    double originRelativeTargetY = camRelativeTargetY - Cameras.OFFSET_CAM.robotToCamTransform.getY();
+    double originRelativeTargetX = camRelativeTargetX - Cameras.OFFSET_CAM.robotToCamTransform.getX();
+    double originRelativeTargetY = camRelativeTargetY + Cameras.OFFSET_CAM.robotToCamTransform.getY();
     double originRelativeTargetZ = camRelativeTargetZ + Cameras.OFFSET_CAM.robotToCamTransform.getZ();
 
     double shiftedTargetX = originRelativeTargetX - offsetPoint.getX();
@@ -640,12 +640,12 @@ public class Vision
     /**
      * Right Camera
      */
-    
+    /* */
     OFFSET_CAM("offsetCamera",
               new Rotation3d(0, 0, 0),
-              new Translation3d(Units.inchesToMeters(7.0),
-                                Units.inchesToMeters(7.75),
-                                Units.inchesToMeters(29)),
+              new Translation3d(Units.inchesToMeters(-2.5),
+                                Units.inchesToMeters(-13),
+                                Units.inchesToMeters(22.75)),
               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
     /**
      * Center Camera
