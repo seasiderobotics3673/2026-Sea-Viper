@@ -7,7 +7,9 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Celsius;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -32,6 +34,7 @@ public class Shooter extends SubsystemBase {
   private SparkFlexConfig kickerMotorPrimaryConfig = new SparkFlexConfig();
   private SparkFlexConfig kickerMotorSecondaryConfig = new SparkFlexConfig();
   private TalonFX launcherMotor = new TalonFX(15);
+  private TalonFX launcherMotorFollower = new TalonFX(45);
 
   public Shooter() {
     kickerMotorPrimaryConfig.idleMode(IdleMode.kBrake);
@@ -39,6 +42,9 @@ public class Shooter extends SubsystemBase {
     kickerMotorSecondaryConfig.idleMode(IdleMode.kBrake);
     kickerMotorSecondaryConfig.follow(25, true);
     kickerMotorSecondary.configure(kickerMotorSecondaryConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    //launcherMotorFollower.setInverted
+    launcherMotorFollower.setControl(new Follower(launcherMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+    //launcherMotorFollower.follo
   }
 
   @Override

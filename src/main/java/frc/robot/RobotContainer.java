@@ -58,7 +58,7 @@ public class RobotContainer
   final         CommandJoystick brodieBox2026 = new CommandJoystick(4);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-                                                                                "swerve/SeaViper"));
+                                                                                "swerve/DonDon"));
 
   private final Vision vision = new Vision(() -> drivebase.getSwerveDrive().getPose(), drivebase.getSwerveDrive().field);
 
@@ -261,7 +261,7 @@ public class RobotContainer
     
       //Deploy Speed (Keep Low) - Top Left Button
       brodieBox2026.button(7)
-        .onTrue(new InstantCommand(()-> intake.setDeploySpeed(-1)))
+        .onTrue(new InstantCommand(()-> intake.setDeploySpeed(1)))
         .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
     }
 
