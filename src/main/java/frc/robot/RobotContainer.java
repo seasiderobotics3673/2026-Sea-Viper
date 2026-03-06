@@ -220,12 +220,13 @@ public class RobotContainer
     {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
       //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
+      //X Stance
+      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
       //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       //Field Oriented
-      driverXbox.leftBumper().toggleOnTrue(new altDriveCommand(drivebase, vision, cameraOffsetEnum, driveAngularVelocity));
+      driverXbox.leftBumper().toggleOnTrue(new altDriveCommand(drivebase, vision, cameraOffsetEnum, driveAngularVelocity, this));
       driverXbox.rightBumper().toggleOnTrue(new SlowDown(drivebase));
       logitechController.a()
         .whileTrue(drivebase.aimAtTarget(cameraOffsetEnum));
