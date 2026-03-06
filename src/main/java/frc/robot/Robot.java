@@ -4,8 +4,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotation;
+
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -35,6 +39,8 @@ public class Robot extends TimedRobot
   private Cameras cameraEnum;
 
   private Timer disabledTimer;
+
+  public static Rotation2d headingFromDownfield;
 
   public Robot()
   {
@@ -96,6 +102,12 @@ public class Robot extends TimedRobot
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    headingFromDownfield = drivebase.getHeading();
+
+    if (drivebase.isRedAlliance()) {
+      headingFromDownfield.plus(Rotation2d.fromDegrees(180));
+    }
   }
 
   /**

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.GeneralMethods;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import swervelib.SwerveInputStream;
 
@@ -20,6 +21,7 @@ public class altDriveCommand extends Command {
   //actualy, make the stuffs you know like dis
   SwerveSubsystem driveBase;
   Vision vision;
+  RobotContainer robotContainer;
 
   Cameras camera;
 
@@ -44,12 +46,13 @@ public class altDriveCommand extends Command {
   boolean isFinishedFlag;
 
 
-  public altDriveCommand(SwerveSubsystem driveBase, Vision vision, Cameras camera, SwerveInputStream controllerInput) {
+  public altDriveCommand(SwerveSubsystem driveBase, Vision vision, Cameras camera, SwerveInputStream controllerInput, RobotContainer robotContainer) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveBase = driveBase;
     this.vision = vision;
     this.camera = camera;
     this.controllerInput = controllerInput;
+    this.robotContainer = robotContainer;
     addRequirements(driveBase);
   }
 
@@ -70,7 +73,7 @@ public class altDriveCommand extends Command {
   public void execute() {
     counter++;
 
-    currentHeading = driveBase.getHeading();
+    currentHeading = robotContainer.getHeadingFromDownField();
     if (counter > 50) {
       System.out.println("Angle to HUB: " + vision.getAngleToHUB(camera, driveBase));
       System.out.println("Current Heading: " + driveBase.getHeading());

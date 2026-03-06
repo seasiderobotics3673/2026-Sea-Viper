@@ -218,8 +218,8 @@ public class RobotContainer
       driverXbox.rightBumper().onTrue(Commands.none());
     } else
     {
-      //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
+      //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
@@ -271,6 +271,9 @@ public class RobotContainer
 
   }
 
+  public Rotation2d getHeadingFromDownField() {
+    return Robot.headingFromDownfield;
+  }
 
   public SwerveSubsystem getDrivebase() {
     return drivebase;
