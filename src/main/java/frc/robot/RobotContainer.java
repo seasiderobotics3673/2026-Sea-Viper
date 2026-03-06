@@ -234,10 +234,14 @@ public class RobotContainer
       //brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 2, vision, 11, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
-      brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
+      //brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
 
 
-      brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
+      ///brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
+      //Reverse Intake - Rev Intake Button
+      brodieBox2026.button(2)
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(-0.75)))
+        .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0)));
 
       //Kicker Motor Set Speed
       brodieBox2026.button(4)
