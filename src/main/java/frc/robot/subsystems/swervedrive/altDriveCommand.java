@@ -73,7 +73,9 @@ public class altDriveCommand extends Command {
   public void execute() {
     counter++;
 
-    currentHeading = robotContainer.getHeadingFromDownField();
+    //currentHeading = robotContainer.getHeadingFromDownField();
+    currentHeading = GeneralMethods.getInvertedHeading(driveBase);
+
     if (counter > 50) {
       System.out.println("Angle to HUB: " + vision.getAngleToHUB(camera, driveBase));
       System.out.println("Current Heading: " + driveBase.getHeading());

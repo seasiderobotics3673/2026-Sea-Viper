@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.swervedrive.centerWithHUB;
 import frc.robot.commands.swervedrive.toggleLauncherMotor;
+import frc.robot.commands.swervedrive.auto.MainAuto;
+import frc.robot.commands.swervedrive.auto.Minimal;
 import frc.robot.commands.swervedrive.drivebase.SlowDown;
 import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
 import frc.robot.commands.swervedrive.vision.moveToTargetDistance;
@@ -145,8 +147,8 @@ public class RobotContainer
     //Set the default auto (do nothing) 
     autoChooser.setDefaultOption("Do Nothing", Commands.none());
 
-    //Add a simple auto option to have the robot drive forward for 1 second then stop
-    autoChooser.addOption("Drive Forward", drivebase.driveForward().withTimeout(1));
+    autoChooser.addOption("Minimal", new Minimal(intake));
+    autoChooser.addOption("Main Auto", new MainAuto(shooter, intake, drivebase, vision, cameraCenterEnum, driveAngularVelocity, this));
     
     //Put the autoChooser on the SmartDashboard
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -218,7 +220,8 @@ public class RobotContainer
       driverXbox.rightBumper().onTrue(Commands.none());
     } else
     {
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
+
+      driverXbox.y().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
       //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       //X Stance
       driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
