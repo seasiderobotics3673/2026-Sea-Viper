@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Rotation;
+
+import com.ctre.phoenix6.SignalLogger;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -46,7 +52,9 @@ public class Robot extends TimedRobot
   //One more than max capacity
   private static ArrayList<PhotonPipelineResult> tagArray = new ArrayList<>(11);
 
-  public static PhotonPipelineResult latestValidResult;
+  private static PhotonPipelineResult latestValidResult;
+
+  public static Rotation2d headingFromDownfield;
 
   public Robot()
   {
@@ -74,6 +82,8 @@ public class Robot extends TimedRobot
 
     cameraEnum = m_robotContainer.getCameraOffsetEnum();
 
+    SignalLogger.stop();
+
     // Create a timer to disable motor brake a few seconds after disable.  This will let the robot stop
     // immediately when disabled, but then also let it be pushed more 
     disabledTimer = new Timer();
@@ -83,7 +93,9 @@ public class Robot extends TimedRobot
       DriverStation.silenceJoystickConnectionWarning(true);
     }
 
-    drivebase.zeroGyro();
+    //drivebase.zeroGyro();
+
+    drivebase.zeroGyroWithAlliance();
 
   }
 
@@ -110,7 +122,6 @@ public class Robot extends TimedRobot
           tagArray.remove(0);
         }
 
-
         if (result.hasTargets()) {
           tagArray.add(result);
         }
@@ -125,6 +136,16 @@ public class Robot extends TimedRobot
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    headingFromDownfield = drivebase.getHeading();
+
+    if (drivebase.isRedAlliance()) {
+      headingFromDownfield.plus(Rotation2d.fromDegrees(180));
+    }
+  }
+
+  public static PhotonPipelineResult getLatestValidResult() {
+    return latestValidResult;
   }
 
   /**

@@ -89,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                                       Meter.of(4)),
                                                     Rotation2d.fromDegrees(180));
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
-    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.NONE;
     try
     {
       swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED, startingPose);
@@ -440,6 +440,7 @@ public class SwerveSubsystem extends SubsystemBase
     });
   }
 
+ 
   /**
    * Command to drive the robot using translative values and heading as a setpoint.
    *
@@ -639,7 +640,12 @@ public class SwerveSubsystem extends SubsystemBase
     double distanceToTarget;
     distanceToTarget = (translation < destDistance) ? destDistance - translation : translation - destDistance;
 
-    double scale = Math.min(1.0, distanceToTarget / fullSpeedDist); //Can add a square to the end of this to smooth scaling
+    double scale = Math.min(1.0, Math.pow(distanceToTarget / fullSpeedDist, 2)); //Can add a square to the end of this to smooth scaling
+    if (scale < 0.01) {
+      scale = 0;
+    } else {
+      System.out.println("Scale: " + scale);
+    }
 
     return maxSpeed * scale;
   }

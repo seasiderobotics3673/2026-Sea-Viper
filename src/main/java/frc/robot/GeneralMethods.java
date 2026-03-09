@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 /** Add your docs here. */
 public class GeneralMethods {
@@ -33,10 +34,18 @@ public class GeneralMethods {
         }
     }
 
-    //Presumes the secondary Translation2d is from (0,0), aka bot center
+    
     public static Rotation2d calculateAngleToPoint(Translation2d point) {
         double theta = Math.atan2(point.getY(), point.getX());
         return Rotation2d.fromRadians(theta);
+    }
+
+    public static Rotation2d getInvertedHeading(SwerveSubsystem drivebase) {
+        Rotation2d heading = drivebase.getHeading();
+        
+        return heading.plus(Rotation2d.fromRadians(Math.PI));
+        //double theta = heading.getRadians();
+        //return new Rotation2d(-theta)
     }
 
 }

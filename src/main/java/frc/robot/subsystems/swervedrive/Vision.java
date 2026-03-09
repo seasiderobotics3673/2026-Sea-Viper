@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Microseconds;
+import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
+import frc.robot.GeneralMethods;
 import frc.robot.Robot;
 import frc.robot.commands.swervedrive.drivebase.rotateToHeading;
 
@@ -336,35 +338,11 @@ public class Vision
     field2d.getObject("tracked targets").setPoses(poses);
   }
 
-
-    //Inaccurate at lower target pitches.
-  public double getDistanceToTarget(Cameras camera) {
-    Optional<PhotonPipelineResult> result0 = camera.getLatestResult();
-    if (result0.isPresent()) {
-      var result = result0.get();
-
-      if (result.hasTargets()) {
-        double estimatedTargetPitch = Math.toRadians(result.getBestTarget().getPitch());
-        double targetHeight = Constants.APRILTAG_HEIGHTS[result.getBestTarget().getFiducialId() - 1]; //Dummy Value; Change Later
-        double estimatedTargetDistance = PhotonUtils.calculateDistanceToTargetMeters
-        (
-          Cameras.OFFSET_CAM.robotToCamTransform.getZ(),
-          targetHeight, 
-          0.0,
-          estimatedTargetPitch
-        );
-
-        return estimatedTargetDistance;
-      }
-    }
-    return -1.0;
-  }
-
   public Transform3d getTargetTransform(Cameras cameraEnum, boolean isSpecificID, int fiducialId) {
     PhotonPipelineResult result = new PhotonPipelineResult();
 
-    if (!Robot.latestValidResult.equals(null)) {
-      result = Robot.latestValidResult;
+    if (!Robot.getLatestValidResult().equals(null)) {
+      result = Robot.getLatestValidResult();
     } else {
       DriverStation.reportWarning("No Valid Result from Camera", false);
       return new Transform3d();
@@ -403,17 +381,12 @@ public class Vision
   }
 
   public ArrayList<PhotonTrackedTarget> getAllTargets(Cameras cameraEnum) {
-    Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
+    PhotonPipelineResult result = new PhotonPipelineResult();
 
-    if (result0.isEmpty()) {
-      DriverStation.reportWarning("Get Target Pose Failed; Is Your Camera On?", false);
-      return new ArrayList<PhotonTrackedTarget>();
-    }
-
-    var result = result0.get();
-
-    if (!result.hasTargets()) {
-      DriverStation.reportWarning("Get Target Pose called with no targets in sight.", false);
+    if (!Robot.getLatestValidResult().equals(null)) {
+      result = Robot.getLatestValidResult();
+    } else {
+      DriverStation.reportWarning("No Valid Result from Camera", false);
       return new ArrayList<PhotonTrackedTarget>();
     }
 
@@ -424,38 +397,35 @@ public class Vision
   }
 
 
-
-  public Translation3d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
-    var targetArray = getAllTargets(cameraEnum);
+  public Translation2d getHUBCenterPoint(Cameras cameraEnum, SwerveSubsystem drivebase) {
+    ArrayList<PhotonTrackedTarget> targetArray = getAllTargets(cameraEnum);
 
     //All Red Alliance HUB IDs
     var idArrayRed = new ArrayList<Integer>(Arrays.asList(9,10,8,5,11,2,4,3));
+
     //All Blue Alliance HUB IDs
     var idArrayBlue = new ArrayList<Integer>(Arrays.asList(19,20,18,27,26,25,24,21));
 
-    if (targetArray.equals(new ArrayList<PhotonTrackedTarget>())) {
-      return new Translation3d();
-    }
+    var offsetTagArray = new ArrayList<Integer>(Arrays.asList(26, 18, 20, 24, 9, 11, 3, 5));
+    var centerTagArray = new ArrayList<Integer>(Arrays.asList(25, 27, 19, 21, 10, 2, 4, 8));
+
+    var idArrayFront = new ArrayList<Integer>(Arrays.asList(9,10,25,26));
+    var idArrayRight = new ArrayList<Integer>(Arrays.asList(11,2,18,27));
+    var idArrayLeft = new ArrayList<Integer>(Arrays.asList(8,5,21,24));
 
     if (drivebase.isRedAlliance()) {
-      for (PhotonTrackedTarget trackedTarget : targetArray) {
-        if (!idArrayRed.contains(trackedTarget.getFiducialId())) {
-          targetArray.remove(trackedTarget);
-        }
-      }
+      targetArray.removeIf(target -> !idArrayRed.contains(target.getFiducialId()));
     } else {
-      for (PhotonTrackedTarget trackedTarget : targetArray) {
-        if (!idArrayBlue.contains(trackedTarget.getFiducialId())) {
-          targetArray.remove(trackedTarget);
-        }
-      }
+      targetArray.removeIf(target -> !idArrayBlue.contains(target.getFiducialId()));
     }
 
     int targetIndex = 0;
     double lowestTargetAmbiguity = 1;
+    boolean targetArrayFlag = false;
 
     //Gets lowest ambiguity target
     for (PhotonTrackedTarget trackedTarget : targetArray) {
+      targetArrayFlag = true;
       //Lower ambiguity values are better.
       double currentTargetAmbiguity = trackedTarget.getPoseAmbiguity();
       if (currentTargetAmbiguity < lowestTargetAmbiguity && Double.compare(currentTargetAmbiguity, -1.0) != 0) {
@@ -464,105 +434,216 @@ public class Vision
       }
     }
 
-    var bestTarget = targetArray.get(targetIndex);
-    Transform3d HUBCenterTransform = new Transform3d();
+    if (targetArrayFlag == false) {
+      DriverStation.reportWarning("No Correct Targets Found", false);
+      return new Translation2d();
+    } else {
+      var bestTarget = targetArray.get(targetIndex);
+      Translation3d targetTransform = shiftTargetTransform(new Translation3d(), bestTarget);
 
-    if (!drivebase.isRedAlliance()) {
+      //-1 is left side, 0 is center, 1 is right side.
+      int currentSide;
 
-      switch (bestTarget.getFiducialId()) {
-        case 25:
-          //Center Front Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(23.5),0.0,0.0, new Rotation3d()));
-          break;
-        case 26:
-          //Offset Front Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(23.5),Units.inchesToMeters(14), 0.0, new Rotation3d()));
-          break;
-        case 27:
-          //Center Right Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(0.0, Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
-          break;
-        case 18: 
-          //Offset Right Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(-14), Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
-          break;
-        case 19:
-          //Center Back Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(-23.5), 0.0, 0.0, new Rotation3d()));
-          break;
-        case 20:
-          //Offset Back Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(-23.5), Units.inchesToMeters(-14), 0.0, new Rotation3d()));
-          break;
-        case 21:
-          //Center Left Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(0.0, Units.inchesToMeters(-23.5), 0.0, new Rotation3d()));
-          break;
-        case 24:
-          //Offset Left Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(14), Units.inchesToMeters(-23.5), 0.0, new Rotation3d()));
-          break;
+      Translation2d tagOffset = new Translation2d();
+
+      //WARN: Might be presuming unchanging reference point again.
+      if (offsetTagArray.contains(bestTarget.getFiducialId())) {
+        tagOffset = new Translation2d(Units.inchesToMeters(23.5), Units.inchesToMeters(14));
+      } else {
+        if (centerTagArray.contains(bestTarget.getFiducialId())) {
+          tagOffset = new Translation2d(Units.inchesToMeters(23.5), 0);
+        }
       }
-    }
+
+      if (idArrayLeft.contains(bestTarget.getFiducialId())) {
+        currentSide = -1;
+      } else if (idArrayFront.contains(bestTarget.getFiducialId())) {
+        currentSide = 0;
+      } else if (idArrayRight.contains(bestTarget.getFiducialId())) {
+        currentSide = 1;
+      } else {
+        DriverStation.reportError("ID Found was not front, left, or right. This should never happen.", false);
+        return new Translation2d();
+      }
+
+      Rotation2d abf = drivebase.getHeading();
+
+      double bc = Math.sqrt((Math.pow(targetTransform.getX(), 2) + Math.pow(targetTransform.getY(), 2)));
+      Rotation2d fbc = Rotation2d.fromRadians(Math.asin(targetTransform.getY() / bc));
+      Rotation2d abc = abf.plus(fbc);
+
+      double ch = 0;
+      double bh = 0;
+      double ei = 0;
+      double bi = 0;
+
+      //Rotation2d headingToHUBCenter = new Rotation2d();
+
+      if (currentSide == 0) {
+        ch = Math.cos(abc.getRadians()) * bc;
+        bh = Math.sin(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        return new Translation2d(ei, bi);
+        //return GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi));
+      }
+
+      if (currentSide == 1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh + tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        return new Translation2d(ei, bi);
+        //return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
+      }
+
+      if (currentSide == -1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch - tagOffset.getX();
+        return new Translation2d(ei, bi);
+        //return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
+      }
+
+      //return new Rotation2d();
+      return new Translation2d();
+  }
+}
+
+
+  public Rotation2d getAngleToHUB(Cameras cameraEnum, SwerveSubsystem drivebase) {
+    ArrayList<PhotonTrackedTarget> targetArray = getAllTargets(cameraEnum);
+
+    //All Red Alliance HUB IDs
+    var idArrayRed = new ArrayList<Integer>(Arrays.asList(9,10,8,5,11,2,4,3));
+
+    //All Blue Alliance HUB IDs
+    var idArrayBlue = new ArrayList<Integer>(Arrays.asList(19,20,18,27,26,25,24,21));
+
+    var offsetTagArray = new ArrayList<Integer>(Arrays.asList(26, 18, 20, 24, 9, 11, 3, 5));
+    var centerTagArray = new ArrayList<Integer>(Arrays.asList(25, 27, 19, 21, 10, 2, 4, 8));
+
+    var idArrayFront = new ArrayList<Integer>(Arrays.asList(9,10,25,26));
+    var idArrayRight = new ArrayList<Integer>(Arrays.asList(11,2,18,27));
+    var idArrayLeft = new ArrayList<Integer>(Arrays.asList(8,5,21,24));
 
     if (drivebase.isRedAlliance()) {
-      
-      switch (bestTarget.getFiducialId()) {
-        case 10:
-          //Center Front Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              //HUB is 47 inches by 47 inches
-                              (new Transform3d(Units.inchesToMeters(23.5), 0.0, 0.0, new Rotation3d()));
-          break;
-        case 9:
-          //Offset Front Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              //wpilib suite has Y offsets.
-                              (new Transform3d(Units.inchesToMeters(23.5), Units.inchesToMeters(14), 0.0, new Rotation3d()));
-          break;
-        case 2:
-          //Center Right Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              (new Transform3d(0.0, Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
-          break;
-        case 11:
-          //Offset Right Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              (new Transform3d(Units.inchesToMeters(-14), Units.inchesToMeters(23.5), 0.0, new Rotation3d()));
-          break;
-        case 4:
-          //Center Back Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              (new Transform3d(Units.inchesToMeters(-23.5), 0.0, 0.0, new Rotation3d()));
-          break;
-        case 3:
-          //Offset Back Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-                              (new Transform3d(Units.inchesToMeters(-23.5), Units.inchesToMeters(-14), 0.0, new Rotation3d()));
-          break;
-        case 8:
-          //Center Left Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(0.0, Units.inchesToMeters(-23.5),0.0, new Rotation3d()));
-          break;
-        case 5:
-          //Offset Left Apriltag
-          HUBCenterTransform = bestTarget.getBestCameraToTarget().plus
-          (new Transform3d(Units.inchesToMeters(14), Units.inchesToMeters(-23.5),0.0, new Rotation3d()));
-          break;
+      targetArray.removeIf(target -> !idArrayRed.contains(target.getFiducialId()));
+    } else {
+      targetArray.removeIf(target -> !idArrayBlue.contains(target.getFiducialId()));
+    }
+
+    int targetIndex = 0;
+    double lowestTargetAmbiguity = 1;
+    boolean targetArrayFlag = false;
+
+    //Gets lowest ambiguity target
+    for (PhotonTrackedTarget trackedTarget : targetArray) {
+      targetArrayFlag = true;
+      //Lower ambiguity values are better.
+      double currentTargetAmbiguity = trackedTarget.getPoseAmbiguity();
+      if (currentTargetAmbiguity < lowestTargetAmbiguity && Double.compare(currentTargetAmbiguity, -1.0) != 0) {
+        lowestTargetAmbiguity = currentTargetAmbiguity;
+        targetIndex = targetArray.indexOf(trackedTarget);
       }
     }
 
-    return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
 
+    //When on right side, reverse all tagOffsets, and sin and cos are opposite. 
+
+    if (targetArrayFlag == false) {
+      DriverStation.reportWarning("No Correct Targets Found", false);
+      return new Rotation2d();
+    } else {
+      var bestTarget = targetArray.get(targetIndex);
+      Transform3d HUBCenterTransform = new Transform3d();
+      Translation3d targetTransform = shiftTargetTransform(new Translation3d(), bestTarget);
+
+      //-1 is left side, 0 is center, 1 is right side.
+      int currentSide;
+
+      Translation2d tagOffset = new Translation2d();
+
+      //WARN: Might be presuming unchanging reference point again.
+      if (offsetTagArray.contains(bestTarget.getFiducialId())) {
+        tagOffset = new Translation2d(Units.inchesToMeters(23.5), Units.inchesToMeters(14));
+      } else {
+        if (centerTagArray.contains(bestTarget.getFiducialId())) {
+          tagOffset = new Translation2d(Units.inchesToMeters(23.5), 0);
+        }
+      }
+
+      if (idArrayLeft.contains(bestTarget.getFiducialId())) {
+        currentSide = -1;
+      } else if (idArrayFront.contains(bestTarget.getFiducialId())) {
+        currentSide = 0;
+      } else if (idArrayRight.contains(bestTarget.getFiducialId())) {
+        currentSide = 1;
+      } else {
+        DriverStation.reportError("ID Found was not front, left, or right. This should never happen.", false);
+        return new Rotation2d();
+      }
+
+      Rotation2d abf = drivebase.getHeading();
+
+      double bc = Math.sqrt((Math.pow(targetTransform.getX(), 2) + Math.pow(targetTransform.getY(), 2)));
+      Rotation2d fbc = Rotation2d.fromRadians(Math.asin(targetTransform.getY() / bc));
+      Rotation2d abc = abf.plus(fbc);
+
+      double ch = 0;
+      double bh = 0;
+      double ei = 0;
+      double bi = 0;
+
+      if (currentSide == 0) {
+        ch = Math.cos(abc.getRadians()) * bc;
+        bh = Math.sin(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi));
+      }
+
+      if (currentSide == 1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh + tagOffset.getY();
+        ei = ch + tagOffset.getX();
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
+      }
+
+      if (currentSide == -1) {
+        ch = Math.sin(abc.getRadians()) * bc;
+        bh = Math.cos(abc.getRadians()) * bc;
+        bi = bh - tagOffset.getY();
+        ei = ch - tagOffset.getX();
+        return GeneralMethods.calculateAngleToPoint(new Translation2d(bi, ei));
+      }
+
+      return new Rotation2d();
+
+      /*
+
+      //Rotation2d headingToHUBCenter = GeneralMethods.calculateAngleToPoint(new Translation2d(ei, bi), signFlip);
+
+      //Rotation2d headingToHUBCenter = PhotonUtils.getYawToPose(new Pose2d(), new Pose2d(new Translation2d(bi, ei), new Rotation2d()));
+      double robotToCenterDistance = Math.sqrt((Math.pow(bi, 2) + Math.pow(ei, 2)));
+      //Rotation2d headingToHUBCenter = Rotation2d.fromRadians(Math.atan(bi / ei) * signFlip);
+
+      System.out.print(" heading: " + abf);
+      System.out.print(" bc: " + bc);
+      System.out.print(" fbc: " + fbc);
+      System.out.print(" abc: " + abc);
+      System.out.print(" ch: " + ch);
+      System.out.println(" bh: " + bh);
+      System.out.print(" bi: " + bi);
+      System.out.print(" ei: " + ei);
+      System.out.println("robotToCenterDistance: " + robotToCenterDistance);
+      System.out.println("headingToHUBCenter: " + headingToHUBCenter);
+      //return new Translation3d(HUBCenterTransform.getX(), HUBCenterTransform.getY(), HUBCenterTransform.getZ());
+
+      */
+      }
   }
 
   public Transform3d getTargetTransformOffset(Cameras camera, Translation3d offsetPoint, boolean isSpecificID, int fiducialId) {
@@ -588,6 +669,24 @@ public class Vision
 
     //return new Transform3d(originRelativeTargetX, originRelativeTargetY, originRelativeTargetZ, camRotation);
     return new Transform3d(offsetRelativeTargetX, offsetRelativeTargetY, offsetRelativeTargetZ, camRotation);
+  }
+
+  public Translation3d shiftTargetTransform(Translation3d offsetPoint, PhotonTrackedTarget target) {
+    Translation3d camRelativeTranslation3d = target.getBestCameraToTarget().getTranslation();
+
+    double camRelativeTargetX = camRelativeTranslation3d.getX();
+    double camRelativeTargetY = camRelativeTranslation3d.getY();
+    double camRelativeTargetZ = camRelativeTranslation3d.getZ();
+
+    double originRelativeTargetX = camRelativeTargetX - Cameras.OFFSET_CAM.robotToCamTransform.getX();
+    double originRelativeTargetY = camRelativeTargetY + Cameras.OFFSET_CAM.robotToCamTransform.getY();
+    double originRelativeTargetZ = camRelativeTargetZ + Cameras.OFFSET_CAM.robotToCamTransform.getZ();
+
+    double shiftedTargetX = originRelativeTargetX - offsetPoint.getX();
+    double shiftedTargetY = originRelativeTargetY + offsetPoint.getY();
+    double shiftedTargetZ = originRelativeTargetZ + offsetPoint.getZ();
+
+    return new Translation3d(shiftedTargetX, shiftedTargetY, shiftedTargetZ);
   }
 
   //Should provide the actual camera name, not the name property of the camera-- OFFSET_CAMERA instead of offsetCamera
@@ -616,12 +715,12 @@ public class Vision
     /**
      * Right Camera
      */
-    
+    /* */
     OFFSET_CAM("offsetCamera",
               new Rotation3d(0, 0, 0),
-              new Translation3d(Units.inchesToMeters(7.0),
-                                Units.inchesToMeters(7.75),
-                                Units.inchesToMeters(29)),
+              new Translation3d(Units.inchesToMeters(-2.5),
+                                Units.inchesToMeters(-13),
+                                Units.inchesToMeters(22.75)),
               VecBuilder.fill(4, 4, 8), VecBuilder.fill(0.5, 0.5, 1)),
     /**
      * Center Camera

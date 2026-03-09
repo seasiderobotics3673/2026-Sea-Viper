@@ -4,31 +4,62 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Celsius;
+
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
+
+  StatusSignal<Temperature> launcherTemperature;
+  double kickerTemperature;
+  
   /** Creates a new Shooter. */
   //private TalonFX kickerMotor = new TalonFX(25);
-  private SparkFlex kickerMotor = new SparkFlex(25, MotorType.kBrushless);
-  private SparkFlexConfig kickerMotorConfig = new SparkFlexConfig();
+  private SparkFlex kickerMotorSecondary = new SparkFlex(35, MotorType.kBrushless);
+  private SparkFlex kickerMotorPrimary = new SparkFlex(25, MotorType.kBrushless);
+  private SparkFlexConfig kickerMotorPrimaryConfig = new SparkFlexConfig();
+  private SparkFlexConfig kickerMotorSecondaryConfig = new SparkFlexConfig();
   private TalonFX launcherMotor = new TalonFX(15);
+  private TalonFX launcherMotorFollower = new TalonFX(45);
 
   public Shooter() {
-    //kickerMotor.configure(kickerMotorConfig, null, null)
+    kickerMotorPrimaryConfig.idleMode(IdleMode.kBrake);
+    kickerMotorPrimary.configure(kickerMotorPrimaryConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    kickerMotorSecondaryConfig.idleMode(IdleMode.kBrake);
+    kickerMotorSecondaryConfig.follow(25, true);
+    kickerMotorSecondary.configure(kickerMotorSecondaryConfig, com.revrobotics.ResetMode.kNoResetSafeParameters, com.revrobotics.PersistMode.kNoPersistParameters);
+    //launcherMotorFollower.setInverted
+    launcherMotorFollower.setControl(new Follower(launcherMotor.getDeviceID(), MotorAlignmentValue.Aligned));
+    //launcherMotorFollower.follo
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    launcherTemperature = launcherMotor.getDeviceTemp();
+    kickerTemperature = kickerMotorPrimary.getMotorTemperature();
+    SmartDashboard.putNumber("Launcher Temperature: ", Units.Fahrenheit.convertFrom(launcherTemperature.getValueAsDouble(), Celsius));
+    SmartDashboard.putNumber("Kicker Temperature: ", Units.Fahrenheit.convertFrom(kickerTemperature, Celsius));
+    SmartDashboard.updateValues();
   }
 
   public void setKickerMotorSpeed(double speed){
-    kickerMotor.set(speed);
+    kickerMotorPrimary.set(speed);
   } 
 
   public void setLauncherMotorSpeed(double speed){
