@@ -4,6 +4,15 @@
 
 package frc.robot;
 
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Optional;
+
+import org.opencv.core.Size;
+import org.photonvision.proto.Photon;
+import org.photonvision.targeting.PhotonPipelineResult;
+
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,6 +42,11 @@ public class Robot extends TimedRobot
   private Cameras cameraEnum;
 
   private Timer disabledTimer;
+
+  //One more than max capacity
+  private static ArrayList<PhotonPipelineResult> tagArray = new ArrayList<>(11);
+
+  public static PhotonPipelineResult latestValidResult;
 
   public Robot()
   {
@@ -85,6 +99,27 @@ public class Robot extends TimedRobot
   @Override
   public void robotPeriodic()
   {
+    if (cameraEnum.photonCamera.isConnected()) {
+      Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
+
+      if (result0.isPresent()) {
+        var result = result0.get();
+
+        //If we're about to go over capacity (length equals 10), remove oldest result.
+        if (tagArray.size() == 10){
+          tagArray.remove(0);
+        }
+
+
+        if (result.hasTargets()) {
+          tagArray.add(result);
+        }
+      }
+
+      latestValidResult = tagArray.get(tagArray.size() -1 );
+    }
+   
+
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic

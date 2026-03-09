@@ -361,19 +361,15 @@ public class Vision
   }
 
   public Transform3d getTargetTransform(Cameras cameraEnum, boolean isSpecificID, int fiducialId) {
-    Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
+    PhotonPipelineResult result = new PhotonPipelineResult();
 
-    if (result0.isEmpty()) {
-      DriverStation.reportWarning("Get Target Pose Failed; Is Your Camera On?", false);
+    if (!Robot.latestValidResult.equals(null)) {
+      result = Robot.latestValidResult;
+    } else {
+      DriverStation.reportWarning("No Valid Result from Camera", false);
       return new Transform3d();
     }
 
-    var result = result0.get();
-
-    if (!result.hasTargets()) {
-      DriverStation.reportWarning("Get Target Pose called with no targets in sight.", false);
-      return new Transform3d();
-    }
 
     var targetArray = new ArrayList<PhotonTrackedTarget>(10);
     targetArray.addAll(result.getTargets());
