@@ -221,10 +221,13 @@ public class RobotContainer
     } else
     {
 
+      //Robot Relative Mode
       driverXbox.y().onTrue((Commands.runOnce(drivebase::zeroGyroWithAlliance)));
-      //driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       //X Stance
       driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      driverXbox.a()
+        .toggleOnTrue(new InstantCommand(()-> drivebase.setDefaultCommand(driveRobotOrientedAngularVelocity)))
+        .toggleOnFalse(new InstantCommand(()-> drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity)));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
       //driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
@@ -238,7 +241,7 @@ public class RobotContainer
       //brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 2, vision, 11, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
-      //brodieBox2026.button(1).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
+      brodieBox2026.button(3).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
 
 
       ///brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));

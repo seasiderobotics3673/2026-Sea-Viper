@@ -37,13 +37,6 @@ public class testCommand extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //vision.getAngleToHUB(cameraEnum, drivebase);
-    //System.out.println(drivebase.getHeading());
-    //System.out.println("getAllTargets: " + vision.getAllTargets(cameraEnum));
-    //System.out.println("getTagPoint: " + vision.getTargetTransform(cameraEnum, false, 0));
-    //System.out.println("getHUBCenterPoint: " + vision.getHUBCenterPoint(cameraEnum, drivebase));
-    //System.out.println("getTargetPos: " + vision.getTargetTransform(cameraEnum, isSpecificID, fiducialId).getTranslation() + " " + drivebase.getHeading());
-    //System.out.println("");
-    //System.out.println("getTargetPosOffset: " + vision.getTargetTransformOffset(cameraEnum, offsetPoint, isSpecificID, fiducialId).getTranslation());
+    System.out.println("Get all Targets: " + vision.getAllTargets(cameraEnum));
   }
 }
