@@ -247,7 +247,7 @@ public class RobotContainer
       ///brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
       //Reverse Intake - Rev Intake Button
       brodieBox2026.button(2)
-        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(-0.75)))
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.40)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0)));
 
       //Kicker Motor Set Speed
@@ -262,7 +262,7 @@ public class RobotContainer
       
       //Set Intake Speed - Intake Button
       brodieBox2026.button(5)
-        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(0.75)))
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(-0.40)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
 
       //Launcher Motor Speed - Bottom Left Button
