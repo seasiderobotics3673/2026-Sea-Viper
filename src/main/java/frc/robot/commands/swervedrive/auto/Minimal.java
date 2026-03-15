@@ -22,9 +22,7 @@ public class Minimal extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new simpleDrive(drivebase, new Translation2d(-1, 0)).withTimeout(1.65),
-      new AutoWait(300),
-      new InstantCommand(()-> intake.setDeploySpeed(1))
+      new simpleDrive(drivebase, new Translation2d(-1, 0)).withTimeout(1.65)
     );
   }
 }

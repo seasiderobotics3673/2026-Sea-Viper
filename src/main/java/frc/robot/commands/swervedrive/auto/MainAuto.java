@@ -30,9 +30,9 @@ public class MainAuto extends SequentialCommandGroup {
     addCommands(
       new simpleDrive(drivebase, new Translation2d(-1, 0)).withTimeout(1.75),
       new AutoWait(200),
-      new InstantCommand(()-> intake.setDeploySpeed(1)),
-      new AutoWait(100),
-      new InstantCommand(()-> intake.setDeploySpeed(0)),
+      //new InstantCommand(()-> intake.setDeploySpeed(1)),
+      //new AutoWait(100),
+      //new InstantCommand(()-> intake.setDeploySpeed(0)),
       new altDriveCommand(drivebase, vision, camera, controllerInput, robotContainer).withTimeout(1),
       new moveNearTargetPoint(drivebase, vision, camera, 2),
       new AutoWait(300),

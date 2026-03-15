@@ -272,9 +272,11 @@ public class RobotContainer
         //.toggleOnFalse(new InstantCommand(()-> shooter.setLauncherMotorSpeed(0.0)));
     
       //Deploy Speed (Keep Low) - Top Left Button
+      /*
       brodieBox2026.button(7)
         .onTrue(new InstantCommand(()-> intake.setDeploySpeed(1)))
         .onFalse(new InstantCommand(()-> intake.setDeploySpeed(0.0)));
+      */
     }
 
   }
