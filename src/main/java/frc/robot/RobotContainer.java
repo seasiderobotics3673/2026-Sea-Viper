@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.swervedrive.centerWithHUB;
 import frc.robot.commands.swervedrive.toggleLauncherMotor;
+import frc.robot.commands.swervedrive.toggleLauncherSuper;
 import frc.robot.commands.swervedrive.auto.MainAuto;
 import frc.robot.commands.swervedrive.auto.Minimal;
 import frc.robot.commands.swervedrive.drivebase.SlowDown;
@@ -147,7 +148,7 @@ public class RobotContainer
     //Set the default auto (do nothing) 
     autoChooser.setDefaultOption("Do Nothing", Commands.none());
 
-    autoChooser.addOption("Minimal", new Minimal(intake));
+    autoChooser.addOption("Minimal", new Minimal(intake, drivebase));
     autoChooser.addOption("Main Auto", new MainAuto(shooter, intake, drivebase, vision, cameraCenterEnum, driveAngularVelocity, this));
     
     //Put the autoChooser on the SmartDashboard
@@ -241,8 +242,8 @@ public class RobotContainer
       //brodieBox2026.button(3).onTrue(new centerWithHUB(drivebase, 2, vision, 11, Constants.FRONT_EDGE_TRANSLATION3D));
       //brodieBox2026.button(3).onTrue()
 
-      brodieBox2026.button(3).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
-
+      //brodieBox2026.button(3).onTrue(new testCommand(cameraOffsetEnum, Constants.FRONT_EDGE_TRANSLATION3D, false, 0, vision, drivebase));
+      brodieBox2026.button(3).toggleOnTrue(new toggleLauncherSuper(shooter));
 
       ///brodieBox2026.button(2).onTrue(new rotateToHeading(drivebase, Rotation2d.fromDegrees(-20)));
       //Reverse Intake - Rev Intake Button
@@ -262,7 +263,7 @@ public class RobotContainer
       
       //Set Intake Speed - Intake Button
       brodieBox2026.button(5)
-        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(-0.40)))
+        .onTrue(new InstantCommand(()-> intake.setIntakeSpeed(-0.50)))
         .onFalse(new InstantCommand(()-> intake.setIntakeSpeed(0.0)));
 
       //Launcher Motor Speed - Bottom Left Button
