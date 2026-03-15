@@ -258,7 +258,7 @@ public class RobotContainer
 
       //Reverse Kicker
       brodieBox2026.button(1)
-        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.7)))
+        .onTrue(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.6)))
         .onFalse(new InstantCommand(()-> shooter.setKickerMotorSpeed(0.0)));
       
       //Set Intake Speed - Intake Button

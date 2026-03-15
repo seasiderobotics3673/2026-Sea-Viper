@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
-  private SparkMax deployMotor = new SparkMax(16,MotorType.kBrushless);
+  //private SparkMax deployMotor = new SparkMax(16,MotorType.kBrushless);
   private TalonFX intakeMotor = new TalonFX(26);
 
   public Intake() {}
@@ -23,7 +23,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void setDeploySpeed(double speed){
-    deployMotor.set(speed);
+    System.out.println("Attempted to set deploy speed");
   }
   
   public void setIntakeSpeed(double speed){
