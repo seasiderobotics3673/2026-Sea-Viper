@@ -111,7 +111,7 @@ public class Robot extends TimedRobot
   @Override
   public void robotPeriodic()
   {
-    /*
+    
     if (cameraEnum.photonCamera.isConnected()) {
       Optional<PhotonPipelineResult> result0 = cameraEnum.getLatestResult();
 
@@ -128,9 +128,11 @@ public class Robot extends TimedRobot
         }
       }
 
-      latestValidResult = tagArray.get(tagArray.size() -1 );
+      if (!tagArray.isEmpty()) {
+        latestValidResult = tagArray.get(tagArray.size() -1 );
+      }
     }
-    */
+    
    
 
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -189,6 +191,9 @@ public class Robot extends TimedRobot
     {
       m_autonomousCommand.schedule();
     }
+
+    drivebase.zeroGyroWithAlliance();
+
   }
 
   /**

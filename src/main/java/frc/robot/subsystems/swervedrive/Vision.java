@@ -341,7 +341,7 @@ public class Vision
   public Transform3d getTargetTransform(Cameras cameraEnum, boolean isSpecificID, int fiducialId) {
     PhotonPipelineResult result = new PhotonPipelineResult();
 
-    if (!Robot.getLatestValidResult().equals(null)) {
+    if (Robot.getLatestValidResult() != null) {
       result = Robot.getLatestValidResult();
     } else {
       DriverStation.reportWarning("No Valid Result from Camera", false);
@@ -383,7 +383,7 @@ public class Vision
   public ArrayList<PhotonTrackedTarget> getAllTargets(Cameras cameraEnum) {
     PhotonPipelineResult result = new PhotonPipelineResult();
 
-    if (!Robot.getLatestValidResult().equals(null)) {
+    if (Robot.getLatestValidResult() == null) {
       result = Robot.getLatestValidResult();
     } else {
       DriverStation.reportWarning("No Valid Result from Camera", false);
@@ -391,7 +391,9 @@ public class Vision
     }
 
     var targetArray = new ArrayList<PhotonTrackedTarget>(20);
-    targetArray.addAll(result.getTargets());
+    if (result != null) {
+      targetArray.addAll(result.getTargets());
+    }
 
     return targetArray;
   }
